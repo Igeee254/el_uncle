@@ -1,0 +1,34 @@
+﻿python :   File "C:\Users\mute
+t\OneDrive\Desktop\el_uncle\ba
+ckend\seed.py", line 23
+At line:1 char:1
++ python seed.py 2>&1 | 
+Out-File -Encoding utf8 
+seed_error.txt
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo            
+  : NotSpecifi    ed: (  File 
+"C:\Us    er...ed.py", line   
+  23:String) [], Rem    
+oteException
+    + FullyQualifiedEr    
+rorId : NativeComm    andError
+ 
+    { "id": '23', "title": 
+'Turquoise Breeze Anklet', 
+"price": 1100, "image": 
+'bracelet.png', "height": 
+240, "badgeColor": '#26A69A', 
+"category": 'Anklets', 
+"rating: 4, "reviewsCount": 
+61 },
+                              
+                              
+                              
+                              
+                              
+                              
+  ^
+SyntaxError: unterminated 
+string literal (detected at 
+line 23)

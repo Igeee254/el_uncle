@@ -1,0 +1,33 @@
+﻿python : Traceback 
+(most recent call 
+last):
+At line:1 char:1
++ python seed.py 2>&1 
+| Out-File -Encoding 
+utf8 seed_error2.txt
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (Traceback (mo   
+ st recent call las    
+t)::String) [], Re    
+moteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  File "C:\Users\mutet\
+OneDrive\Desktop\el_unc
+le\backend\seed.py", 
+line 1, in <module>
+    from app import 
+app, db
+  File "C:\Users\mutet\
+OneDrive\Desktop\el_unc
+le\backend\app.py", 
+line 3, in <module>
+    from flask_limiter 
+import Limiter
+ModuleNotFoundError: 
+No module named 
+'flask_limiter'
