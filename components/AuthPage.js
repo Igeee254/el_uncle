@@ -1,32 +1,80 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const AuthPage = ({ onNavigate, onLogin, theme, isDark }) => {
-    const [isLogin, setIsLogin] = useState(false); // Default to Signup as requested: "direct them to the sign up"
+    const API_URL = 'http://192.168.1.186:5000/api';
+    const [isLogin, setIsLogin] = useState(true);
+    const [isVerifying, setIsVerifying] = useState(false);
     const [nickname, setNickname] = useState('');
-    const [phone, setPhone] = useState('');
+    const [fullName, setFullName] = useState(''); // Official Name
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [pendingEmail, setPendingEmail] = useState('');
 
-    const handleSubmit = () => {
-        // Basic validation
-        if (!phone || !password || (!isLogin && !nickname)) {
+    const handleSubmit = async () => {
+        if (!email || !password || (!isLogin && (!nickname || !fullName))) {
             alert("Please fill in all fields");
             return;
         }
 
-        const profile = {
-            nickname: isLogin ? 'Art Enthusiast' : nickname,
-            profilePic: `https://i.pravatar.cc/150?u=${phone}`,
-            primaryPhone: phone,
-            secondaryPhone: '',
-        };
+        setLoading(true);
+        try {
+            const endpoint = isLogin ? '/login' : '/signup';
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: nickname,
+                    full_name: fullName,
+                    email,
+                    password
+                })
+            });
 
-        onLogin(profile);
+            const data = await response.json();
+            if (response.ok) {
+                if (!isLogin) {
+                    setPendingEmail(email);
+                    setIsVerifying(true);
+                } else {
+                    onLogin(data.user);
+                }
+            } else {
+                if (data.is_unverified) {
+                    setPendingEmail(email);
+                    setIsVerifying(true);
+                } else {
+                    alert(data.error || "Authentication failed");
+                }
+            }
+        } catch (e) {
+            alert("Could not connect to server");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const checkVerificationStatus = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/admin/check-verification/${pendingEmail}`);
+            const data = await response.json();
+            if (data.verified) {
+                onLogin(data.user);
+            } else {
+                alert("Email not yet verified. Please check your inbox.");
+            }
+        } catch (e) {
+            alert("Error checking verification");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.authBackground }]}>
+        <View style={[styles.container, styles.safeContainer, { backgroundColor: theme.authBackground }]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -36,71 +84,108 @@ const AuthPage = ({ onNavigate, onLogin, theme, isDark }) => {
                         <Ionicons name="close-outline" size={32} color={theme.icon} />
                     </TouchableOpacity>
 
-                    <View style={styles.authBox}>
-                        <Text style={[styles.title, { color: theme.text }]}>
-                            {isLogin ? 'Welcome Back' : 'Join GMK'}
-                        </Text>
-                        <Text style={[styles.subtitle, { color: theme.secondaryText }]}>
-                            {isLogin ? 'Log in to continue your art journey' : 'Create an account to start collecting'}
-                        </Text>
+                    {isVerifying ? (
+                        <View style={styles.authBox}>
+                            <Ionicons name="mail-unread-outline" size={60} color={theme.accent} style={{ alignSelf: 'center', marginBottom: 20 }} />
+                            <Text style={[styles.title, { color: theme.text, textAlign: 'center' }]}>Verify Email</Text>
+                            <Text style={[styles.subtitle, { color: theme.secondaryText, textAlign: 'center' }]}>
+                                We've sent a link to <Text style={{ fontWeight: 'bold', color: theme.accent }}>{pendingEmail}</Text>.
+                                Click it to activate your account.
+                            </Text>
 
-                        <View style={styles.form}>
-                            {!isLogin && (
+                            <TouchableOpacity style={[styles.submitButton, { backgroundColor: '#4caf50' }]} onPress={checkVerificationStatus} disabled={loading}>
+                                <Text style={styles.submitButtonText}>{loading ? 'CHECKING...' : "I'VE VERIFIED - LOG IN"}</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => setIsVerifying(false)} style={{ marginTop: 20 }}>
+                                <Text style={[styles.toggleAction, { color: theme.secondaryText, textAlign: 'center' }]}>Back to Login</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View style={styles.authBox}>
+                            <Image
+                                source={require('../pictures/kweli-logo.png')}
+                                style={styles.authLogo}
+                                resizeMode="contain"
+                            />
+                            <Text style={[styles.title, { color: theme.text }]}>
+                                {isLogin ? 'Welcome Back' : 'Join KweliStoreKenya'}
+                            </Text>
+                            <Text style={[styles.subtitle, { color: theme.secondaryText }]}>
+                                {isLogin ? 'Log in to continue your art journey' : 'Create an account to start collecting'}
+                            </Text>
+
+                            <View style={styles.form}>
+                                {!isLogin && (
+                                    <>
+                                        <View style={styles.inputGroup}>
+                                            <Text style={[styles.label, { color: theme.secondaryText }]}>FULL NAMES</Text>
+                                            <TextInput
+                                                style={[styles.input, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
+                                                placeholder="Enter your official full names"
+                                                placeholderTextColor={theme.secondaryText}
+                                                value={fullName}
+                                                onChangeText={setFullName}
+                                            />
+                                        </View>
+                                        <View style={styles.inputGroup}>
+                                            <Text style={[styles.label, { color: theme.secondaryText }]}>NICKNAME</Text>
+                                            <TextInput
+                                                style={[styles.input, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
+                                                placeholder="e.g. ArtCollector254"
+                                                placeholderTextColor={theme.secondaryText}
+                                                value={nickname}
+                                                onChangeText={setNickname}
+                                            />
+                                        </View>
+                                    </>
+                                )}
+
                                 <View style={styles.inputGroup}>
-                                    <Text style={[styles.label, { color: theme.secondaryText }]}>NICKNAME</Text>
+                                    <Text style={[styles.label, { color: theme.secondaryText }]}>EMAIL ADDRESS</Text>
                                     <TextInput
                                         style={[styles.input, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
-                                        placeholder="e.g. ArtCollector254"
+                                        placeholder="user@example.com"
                                         placeholderTextColor={theme.secondaryText}
-                                        value={nickname}
-                                        onChangeText={setNickname}
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                        value={email}
+                                        onChangeText={setEmail}
                                     />
                                 </View>
-                            )}
 
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, { color: theme.secondaryText }]}>PHONE NUMBER</Text>
-                                <TextInput
-                                    style={[styles.input, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
-                                    placeholder="+254..."
-                                    placeholderTextColor={theme.secondaryText}
-                                    keyboardType="phone-pad"
-                                    value={phone}
-                                    onChangeText={setPhone}
-                                />
+                                <View style={styles.inputGroup}>
+                                    <Text style={[styles.label, { color: theme.secondaryText }]}>PASSWORD</Text>
+                                    <TextInput
+                                        style={[styles.input, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
+                                        placeholder="••••••••"
+                                        placeholderTextColor={theme.secondaryText}
+                                        secureTextEntry
+                                        value={password}
+                                        onChangeText={setPassword}
+                                    />
+                                </View>
+
+                                <TouchableOpacity style={[styles.submitButton, { backgroundColor: theme.accent }]} onPress={handleSubmit} disabled={loading}>
+                                    <Text style={styles.submitButtonText}>{loading ? 'PROCESSING...' : (isLogin ? 'LOG IN' : 'SIGN UP')}</Text>
+                                </TouchableOpacity>
                             </View>
 
-                            <View style={styles.inputGroup}>
-                                <Text style={[styles.label, { color: theme.secondaryText }]}>PASSWORD</Text>
-                                <TextInput
-                                    style={[styles.input, { color: theme.text, backgroundColor: theme.cardBackground, borderColor: theme.border }]}
-                                    placeholder="••••••••"
-                                    placeholderTextColor={theme.secondaryText}
-                                    secureTextEntry
-                                    value={password}
-                                    onChangeText={setPassword}
-                                />
-                            </View>
-
-                            <TouchableOpacity style={[styles.submitButton, { backgroundColor: theme.accent }]} onPress={handleSubmit}>
-                                <Text style={styles.submitButtonText}>{isLogin ? 'LOG IN' : 'SIGN UP'}</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.toggleContainer}>
-                            <Text style={[styles.toggleText, { color: theme.secondaryText }]}>
-                                {isLogin ? "Don't have an account?" : "Already have an account?"}
-                            </Text>
-                            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                                <Text style={[styles.toggleAction, { color: theme.accent }]}>
-                                    {isLogin ? ' Sign Up' : ' Log In'}
+                            <View style={styles.toggleContainer}>
+                                <Text style={[styles.toggleText, { color: theme.secondaryText }]}>
+                                    {isLogin ? "Don't have an account?" : "Already have an account?"}
                                 </Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+                                    <Text style={[styles.toggleAction, { color: theme.accent }]}>
+                                        {isLogin ? ' Sign Up' : ' Log In'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </View>
+                    )}
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -127,6 +212,12 @@ const styles = StyleSheet.create({
         maxWidth: 450,
         alignSelf: 'center',
         padding: 20,
+    },
+    authLogo: {
+        width: 180,
+        height: 100,
+        alignSelf: 'center',
+        marginBottom: 20,
     },
     title: {
         fontSize: 32,

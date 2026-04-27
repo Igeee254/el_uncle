@@ -1,0 +1,28 @@
+﻿Added product: Arsenal Leather Bracelet
+Added product: Masai Beaded Bracelet
+Added product: Kenya Flag Bracelet
+Added product: Savannah Sunset Cuff
+Added product: Desert Rose Bangle
+Added product: Safari Braided Wristband
+Added product: Tribal Bone Inlay Cuff
+Added product: Zebra Pattern Bracelet
+Added product: Mount Kenya Stone Beaded
+Added product: Safari Beaded Necklace
+Added product: Gold Link Chain
+Added product: Sterling Silver Chain
+Added product: Antique Bronze Chain
+Added product: Maasai Warrior Choker
+Added product: Hand-Carved Pendant
+Added product: Crystal Charm Anklet
+Added product: Sea Shell Anklet
+Added product: Golden Sands Anklet
+Added product: Turquoise Breeze Anklet
+Added product: Boho Tassel Anklet
+Added product: Africa Map Wood Magnet
+Added product: Arsenal Sport Keychain
+Added product: Hakuna Matata Magnet
+Added product: Arsenal Vintage Badge
+Added product: Elephant Ebony Statue
+Added product: Baobab Tree Keychain
+COMMITTED 26 products to the database.
+Database seeded successfully with MOCK_DATA.

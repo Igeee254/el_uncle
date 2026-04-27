@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Image, useWindowDimensions } from 'react-native';
 
 const CAROUSEL_ITEMS = [
-    { id: '1', title: 'Premium Leather', image: require('../assets/bracelet.png') },
-    { id: '2', title: 'Kenya Souvenirs', image: require('../assets/magnet.png') },
-    { id: '3', title: 'Stone Beaded', image: require('../assets/beaded.png') },
-    { id: '4', title: 'Vintage Keychains', image: require('../assets/keychain.png') },
+    { id: '1', title: 'Smart Gadgets', image: require('../assets/keychain.png') },
+    { id: '2', title: 'Fashion Trends', image: require('../assets/hero.png') },
+    { id: '3', title: 'Home Essentials', image: require('../assets/magnet.png') },
+    { id: '4', title: 'Health & Beauty', image: require('../assets/beaded.png') },
 ];
 
 const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
@@ -15,8 +15,8 @@ const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
     const NavLinks = () => (
         <View style={[styles.navLinks, isMobile && styles.navLinksMobile]}>
             <TouchableOpacity onPress={() => onNavigate('Home')}><Text style={styles.navLink}>Home</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={styles.navLink}>Traditional Bracelets</Text></TouchableOpacity>
-            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={styles.navLink}>Premium Collection</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={styles.navLink}>Fashion</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={styles.navLink}>Electronics</Text></TouchableOpacity>
             <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={styles.navLink}>Shop All</Text></TouchableOpacity>
             <TouchableOpacity onPress={() => onNavigate('About')}><Text style={styles.navLink}>About Us</Text></TouchableOpacity>
         </View>
@@ -35,7 +35,7 @@ const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
                         {/* Top Navigation */}
                         <View style={styles.navBar}>
                             <TouchableOpacity onPress={() => onNavigate('Home')}>
-                                <Text style={styles.logo}>GMK</Text>
+                                <Text style={styles.logo}>KweliStoreKenya</Text>
                             </TouchableOpacity>
                             {!isMobile && <NavLinks />}
                             <View style={styles.headerRight}>
@@ -51,7 +51,7 @@ const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
                                 imageStyle={styles.heroBackgroundImage}
                             >
                                 <View style={[styles.cardOverlay, { backgroundColor: isDark ? 'rgba(0,100,200,0.3)' : 'rgba(60,180,231,0.2)' }]}>
-                                    <Text style={styles.headline}>Welcome to Gift Masters Kenya</Text>
+                                    <Text style={styles.headline}>Welcome to KweliStoreKenya</Text>
                                     <TouchableOpacity style={styles.button} onPress={() => onNavigate('Home')}>
                                         <Text style={styles.buttonText}>Get Started</Text>
                                     </TouchableOpacity>

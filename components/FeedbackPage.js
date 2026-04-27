@@ -9,23 +9,39 @@ const MOCK_TESTIMONIALS = [
 ];
 
 const FeedbackPage = ({ theme, isDark, onNavigate }) => {
-    const [name, setName] = useState('');
-    const [rating, setRating] = useState(5);
-    const [comment, setComment] = useState('');
+    const [suggestion, setSuggestion] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!name || !comment) {
             alert('Please provide your name and a comment.');
             return;
         }
-        setSubmitted(true);
-        setTimeout(() => {
-            setName('');
-            setRating(5);
-            setComment('');
-            setSubmitted(false);
-        }, 3000);
+
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('http://192.168.1.186:5000/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, rating, comment, suggestion })
+            });
+
+            if (response.ok) {
+                setSubmitted(true);
+                setName('');
+                setRating(5);
+                setComment('');
+                setSuggestion('');
+                setTimeout(() => setSubmitted(false), 5000);
+            } else {
+                alert('Failed to submit feedback. Try again.');
+            }
+        } catch (e) {
+            alert('Network error. Check connection to backend.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -62,7 +78,7 @@ const FeedbackPage = ({ theme, isDark, onNavigate }) => {
                 {/* 2. FEEDBACK FORM */}
                 <View style={[styles.formContainer, { backgroundColor: theme.cardBackground }]}>
                     <Text style={[styles.formTitle, { color: theme.text }]}>Leave Your Feedback</Text>
-                    <Text style={[styles.formSubtitle, { color: theme.secondaryText }]}>Share your experience with Gift Masters Kenya</Text>
+                    <Text style={[styles.formSubtitle, { color: theme.secondaryText }]}>Share your experience with KweliStoreKenya</Text>
 
                     <Text style={[styles.label, { color: theme.text }]}>Full Name</Text>
                     <TextInput
@@ -93,12 +109,27 @@ const FeedbackPage = ({ theme, isDark, onNavigate }) => {
                         numberOfLines={4}
                     />
 
+                    {rating <= 2 && (
+                        <View style={{ marginBottom: 20 }}>
+                            <Text style={[styles.label, { color: theme.error || '#ff7675' }]}>What can we do to make it better?</Text>
+                            <TextInput
+                                style={[styles.textArea, { borderColor: theme.error || '#ff7675', color: theme.text, backgroundColor: theme.background }]}
+                                value={suggestion}
+                                onChangeText={setSuggestion}
+                                placeholder="Your constructive feedback helps us improve..."
+                                placeholderTextColor={theme.secondaryText}
+                                multiline
+                                numberOfLines={3}
+                            />
+                        </View>
+                    )}
+
                     <TouchableOpacity
                         style={[styles.submitBtn, { backgroundColor: theme.accent }]}
                         onPress={handleSubmit}
-                        disabled={submitted}
+                        disabled={isSubmitting || submitted}
                     >
-                        <Text style={styles.submitBtnText}>{submitted ? "SENDING..." : "SUBMIT FEEDBACK"}</Text>
+                        <Text style={styles.submitBtnText}>{isSubmitting ? "SENDING..." : "SUBMIT FEEDBACK"}</Text>
                     </TouchableOpacity>
 
                     {submitted && (

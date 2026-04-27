@@ -1,19 +1,31 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Image, useWindowDimensions } from 'react-native';
 
-const MOCK_CATEGORIES = [
-    { id: '1', title: 'Premium Necklaces', subtitle: 'Gold, Silver & Bronze', image: require('../assets/beaded.png'), category: 'Necklaces' },
-    { id: '2', title: 'Traditional Bracelets', subtitle: 'Beads & Leather', image: require('../assets/bracelet.png'), category: 'Bracelets' },
-    { id: '3', title: 'Artisan Anklets', subtitle: 'Beaded Elegance', image: require('../assets/beaded.png'), category: 'Anklets' },
-    { id: '4', title: 'Special Souvenirs', subtitle: 'Magnets & Keychains', image: require('../assets/magnet.png'), category: 'Souvenirs' },
-];
 
 import ProductCard from './ProductCard';
 
-const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, onBuy, onProductSelect, allProducts, onScroll }) => {
+const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, onBuy, onProductSelect, allProducts, categories, onScroll, wishlist, preferredCategories }) => {
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
     const numColumns = isMobile ? 2 : 3;
+
+    // Recommendation Logic
+    const getRecommendations = () => {
+        if (!allProducts || allProducts.length === 0) return [];
+        const hasInterests = preferredCategories && preferredCategories.length > 0;
+        if (!hasInterests) return [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 6);
+        const interests = preferredCategories;
+        const recommended = allProducts.filter(item => interests.includes(item.category) && !wishlist.find(w => w.id === item.id));
+        if (recommended.length < 4) {
+            const others = allProducts.filter(item => !interests.includes(item.category) && !wishlist.find(w => w.id === item.id)).sort(() => 0.5 - Math.random());
+            return [...recommended, ...others].slice(0, 8);
+        }
+        return recommended.slice(0, 8);
+    };
+
+    const recommendations = getRecommendations();
+
+    const currentCategories = categories && categories.length > 1 ? categories : ['All', 'Fashion', 'Electronics', 'Home & Office', 'Health & Beauty'];
 
     return (
         <ScrollView
@@ -25,14 +37,14 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
             {/* Navbar Minimal */}
             <View style={styles.navBar}>
                 <TouchableOpacity onPress={() => onNavigate('Home')}>
-                    <Text style={[styles.logo, { color: theme.text }]}>GMK KENYA</Text>
+                    <Text style={[styles.logo, { color: theme.text }]}>KweliStoreKenya</Text>
                 </TouchableOpacity>
                 <View style={styles.navBarRight}>
                     {!isMobile && (
                         <View style={styles.navLinks}>
                             <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>CATALOG</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>NEW ARRIVALS</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => onNavigate('Home')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>ABOUT</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>OFFERS</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => onNavigate('Home')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>HELP CENTER</Text></TouchableOpacity>
                             <TouchableOpacity onPress={() => onNavigate('Feedback')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>FEEDBACK</Text></TouchableOpacity>
                         </View>
                     )}
@@ -42,7 +54,7 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
                 </View>
             </View>
 
-            {/* 1. HERO BANNER (Summer Special) */}
+            {/* 1. HERO BANNER (General Marketplace Expansion) */}
             <View style={[styles.heroBanner, { height: isMobile ? 350 : 500 }]}>
                 <ImageBackground
                     source={require('../assets/hero.png')}
@@ -50,54 +62,62 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
                     imageStyle={{ opacity: 0.9 }}
                 >
                     <View style={styles.heroTextOverlay}>
-                        <Text style={styles.heroSubtitle}>Starting At Only KSh 500</Text>
-                        <Text style={styles.heroTitle}>SUMMER SPECIAL{"\n"}COLLECTION</Text>
+                        <Text style={styles.heroSubtitle}>Everything You Need, Delivered</Text>
+                        <Text style={styles.heroTitle}>SHOP THE NEW{"\n"}MARKETPLACE</Text>
                         <TouchableOpacity style={[styles.shopNowBtn, { backgroundColor: theme.accent }]} onPress={() => onNavigate('Shop')}>
-                            <Text style={styles.shopNowText}>Shop Now</Text>
+                            <Text style={styles.shopNowText}>Start Shopping</Text>
                         </TouchableOpacity>
                     </View>
                 </ImageBackground>
             </View>
 
-            {/* 2. CURATED COLLECTIONS (Carousel) */}
-            <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: theme.text }]}>Curated Collections</Text>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalScroll}
-                >
-                    {MOCK_CATEGORIES.map(cat => (
-                        <TouchableOpacity
-                            key={cat.id}
-                            style={styles.catCardCarousel}
-                            onPress={() => onCategorySelect(cat.category)}
-                        >
-                            <Image source={cat.image} style={styles.catImage} resizeMode="cover" />
-                            <View style={styles.catInfo}>
-                                <Text style={[styles.catTitle, { color: theme.text }]}>{cat.category.toUpperCase()}</Text>
-                                <TouchableOpacity style={[styles.catBtn, { backgroundColor: theme.accent }]} onPress={() => onCategorySelect(cat.category)}>
-                                    <Text style={styles.catBtnText}>Shop Now</Text>
-                                </TouchableOpacity>
+            {/* 2. TRENDING SECTION */}
+            {recommendations.length > 0 && (
+                <View style={[styles.section, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }]}>
+                    <View style={styles.sectionHeader}>
+                        <View>
+                            <Text style={[styles.sectionTitle, { color: theme.text, marginBottom: 4 }]}>
+                                {preferredCategories && preferredCategories.length > 0 ? "Personalized For You" : "Trending Deals"}
+                            </Text>
+                            <Text style={[styles.sectionSubtitle, { color: theme.secondaryText, paddingHorizontal: 20, fontSize: 13, marginBottom: 15 }]}>
+                                {preferredCategories && preferredCategories.length > 0 ? "Based on items you've liked" : "Our top picks from across the store"}
+                            </Text>
+                        </View>
+                    </View>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={[styles.horizontalScroll, { paddingVertical: 10 }]}
+                    >
+                        {recommendations.map(item => (
+                            <View key={item.id} style={{ width: 220, marginRight: 15 }}>
+                                <ProductCard
+                                    item={item}
+                                    theme={theme}
+                                    isDark={isDark}
+                                    onBuy={onBuy}
+                                    onProductPress={onProductSelect}
+                                    variant="ecommerce"
+                                />
                             </View>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+            )}
 
-            {/* 3. JUST FOR YOU SECTION */}
+            {/* 3. BROWSE BY CATEGORY SECTION */}
             <View style={[styles.section, { paddingTop: 0 }]}>
-                <Text style={[styles.justForYouTitle, { color: theme.text }]}>Just For You</Text>
+                <Text style={[styles.justForYouTitle, { color: theme.text }]}>Discover Departments</Text>
 
                 {/* Category Filter Chips */}
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                    {['All', 'Necklaces', 'Bracelets', 'Anklets', 'Souvenirs'].map(cat => (
+                    {currentCategories.map(cat => (
                         <TouchableOpacity
                             key={cat}
                             style={[styles.chip, { borderColor: theme.border }]}
                             onPress={() => onCategorySelect(cat)}
                         >
-                            <Text style={[styles.chipText, { color: theme.secondaryText }]}>{cat}</Text>
+                            <Text style={[styles.chipText, { color: theme.secondaryText }]}>{cat.toUpperCase()}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
@@ -199,6 +219,15 @@ const styles = StyleSheet.create({
     },
     section: {
         paddingVertical: 30,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginBottom: 10,
+    },
+    sectionSubtitle: {
+        fontSize: 13,
     },
     sectionTitle: {
         fontSize: 22,

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView, Platform, TouchableOpacity, TextInput, useColorScheme, Alert, BackHandler, ScrollView, Linking, Animated } from 'react-native';
+import { StyleSheet, Text, View, Platform, TouchableOpacity, TextInput, useColorScheme, Alert, BackHandler, ScrollView, Linking, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MasonryGrid from './components/MasonryGrid';
@@ -13,8 +13,10 @@ import CartPage from './components/CartPage';
 import FeedbackPage from './components/FeedbackPage';
 import CheckoutPage from './components/CheckoutPage';
 import AboutUsPage from './components/AboutUsPage';
+import AddressBook from './components/AddressBook';
+import OrderHistory from './components/OrderHistory';
 
-const API_URL = 'http://localhost:5000'; // or 'http://10.0.2.2:5000' for Android emulator
+const API_URL = 'http://192.168.1.186:5000'; // Updated for physical phone connectivity
 
 const IMAGE_MAP = {
   'bracelet.png': require('./assets/bracelet.png'),
@@ -24,6 +26,9 @@ const IMAGE_MAP = {
 };
 
 const STORAGE_KEY = '@user_session';
+const HISTORY_KEY = '@activity_history';
+
+
 
 export default function App() {
   const systemColorScheme = useColorScheme();
@@ -38,12 +43,15 @@ export default function App() {
 
   // Data state
   const [allProducts, setAllProducts] = useState([]);
+  const [categories, setCategories] = useState(['All']);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isTabBarVisible, setIsTabBarVisible] = useState(true);
   const [lastOffset, setLastOffset] = useState(0);
   const [isFilterBarVisible, setIsFilterBarVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlist, setWishlist] = useState([]);
+  const [preferredCategories, setPreferredCategories] = useState([]);
+  const [activityHistory, setActivityHistory] = useState([]);
   const [toastMessage, setToastMessage] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const toastOpacity = useRef(new Animated.Value(0)).current;
@@ -60,6 +68,26 @@ export default function App() {
     });
   }, [toastOpacity]);
 
+  const recordActivity = useCallback(async (type, product) => {
+    const newItem = {
+      id: Date.now().toString(),
+      type, // 'like' or 'cart'
+      productName: product.title || product.name,
+      productId: product.id,
+      timestamp: new Date().toISOString(),
+      category: product.category,
+      image_uri: product.image_uri
+    };
+
+    setActivityHistory(prev => {
+      const updated = [newItem, ...prev].slice(0, 20); // Keep last 20
+      AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated)).catch(console.error);
+      return updated;
+    });
+  }, []);
+
+
+
   const toggleWishlist = useCallback((product) => {
     setWishlist(prev => {
       const exists = prev.find(item => item.id === product.id);
@@ -68,6 +96,16 @@ export default function App() {
         return prev.filter(item => item.id !== product.id);
       } else {
         showToast('Added to Wishlist ❤️');
+        // Add category to preferred categories if not already there
+        setPreferredCategories(current => {
+          if (!current.includes(product.category)) {
+            const updated = [...current, product.category];
+            AsyncStorage.setItem('@preferred_interests', JSON.stringify(updated)).catch(console.error);
+            return updated;
+          }
+          return current;
+        });
+        recordActivity('like', product);
         return [...prev, product];
       }
     });
@@ -90,11 +128,45 @@ export default function App() {
 
   // User Profile State
   const [userProfile, setUserProfile] = useState({
-    nickname: 'Guest User',
+    username: 'Guest User',
+    full_name: '',
+    email: '',
+    phone: '',
+    secondary_phone: '',
+    email_notifications: true,
     profilePic: 'https://i.pravatar.cc/150?u=guest',
-    primaryPhone: '',
-    secondaryPhone: '',
   });
+
+  // ---- fetchProducts: top-level so it can be reused for the refresh button ----
+  const fetchProducts = useCallback(async () => {
+    setIsLoadingProducts(true);
+    try {
+      const url = `${API_URL}/api/products`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+      const data = await response.json();
+      const mappedData = data.map(item => {
+        let imageSource;
+        if (IMAGE_MAP[item.image_uri]) {
+          imageSource = IMAGE_MAP[item.image_uri];
+        } else if (item.image_uri && item.image_uri.startsWith('http')) {
+          // It's a full URL (e.g. from Cloudinary)
+          imageSource = { uri: item.image_uri };
+        } else if (item.image_uri) {
+          // It's a local filename from the backend assets folder
+          imageSource = { uri: `${API_URL}/assets/${item.image_uri}` };
+        } else {
+          imageSource = require('./assets/bracelet.png');
+        }
+        return { ...item, image: imageSource };
+      });
+      setAllProducts(mappedData);
+    } catch (e) {
+      console.warn("[API ERROR] Could not fetch products from backend:", e.message);
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, []);
 
   // Load session on startup
   useEffect(() => {
@@ -111,28 +183,50 @@ export default function App() {
       }
     };
 
-    const fetchProducts = async () => {
+    const loadInterests = async () => {
       try {
-        const platformHost = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
-        const response = await fetch(`http://${platformHost}:5000/api/products`);
-        if (!response.ok) throw new Error('Fetch failed');
-        const data = await response.json();
-        // Map string image_uri back to local requires
-        const mappedData = data.map(item => ({
-          ...item,
-          image: IMAGE_MAP[item.image_uri] || require('./assets/bracelet.png')
-        }));
-        setAllProducts(mappedData);
+        const saved = await AsyncStorage.getItem('@preferred_interests');
+        if (saved) {
+          setPreferredCategories(JSON.parse(saved));
+        }
       } catch (e) {
-        console.error("Could not fetch products:", e);
-      } finally {
-        setIsLoadingProducts(false);
+        console.error('Fail to load interests');
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/categories`);
+        if (response.ok) {
+          const data = await response.json();
+          const catNames = ['All', ...data.map(c => c.name)];
+          setCategories(catNames);
+        }
+      } catch (e) {
+        console.warn("[API ERROR] Could not fetch categories:", e.message);
+      }
+    };
+
+    // fetchProducts is declared above useEffect — just call it here
+
+    const loadHistory = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(HISTORY_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setActivityHistory(Array.isArray(parsed) ? parsed : []);
+        }
+      } catch (e) {
+        console.error('Fail to load history');
       }
     };
 
     loadSession();
+    loadInterests();
+    loadHistory();
+    fetchCategories();
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   const navigateTo = (route) => {
     if (isNavigating) return;
@@ -144,6 +238,9 @@ export default function App() {
         return [...cleanStack, route];
       });
       setCurrentRoute(route);
+
+      // Clear wishlist when moving to another page as requested
+      setWishlist([]);
 
       // Debounce to prevent multiple navigations
       setTimeout(() => {
@@ -188,12 +285,20 @@ export default function App() {
 
   const handleLogout = async () => {
     setIsLoggedIn(false);
-    setUserProfile({ nickname: 'Guest User', profilePic: 'https://i.pravatar.cc/150?u=guest', primaryPhone: '', secondaryPhone: '' });
+    setUserProfile({
+      username: 'Guest User',
+      profilePic: 'https://i.pravatar.cc/150?u=guest',
+      full_name: '',
+      email: '',
+      phone: '',
+      secondary_phone: '',
+      email_notifications: true
+    });
     await AsyncStorage.removeItem(STORAGE_KEY);
     navigateTo('Landing');
   };
 
-  const onBuy = (item) => {
+  const onBuy = (item, isDirect = false) => {
     if (!isLoggedIn) {
       Alert.alert(
         "Authentication Required",
@@ -205,14 +310,20 @@ export default function App() {
       );
     } else {
       setCart(prev => [...prev, item]);
-      Alert.alert(
-        "Added to Cart! 🛒",
-        `${item.title} is waiting for you in the cart.`,
-        [
-          { text: "Keep Shopping", style: "cancel" },
-          { text: "Checkout Now", onPress: () => navigateTo('Checkout') }
-        ]
-      );
+      recordActivity('cart', item);
+
+      if (isDirect) {
+        navigateTo('Checkout');
+      } else {
+        Alert.alert(
+          "Added to Cart! 🛒",
+          `${item.title} is waiting for you in the cart.`,
+          [
+            { text: "Keep Shopping", style: "cancel" },
+            { text: "Checkout Now", onPress: () => navigateTo('Checkout') }
+          ]
+        );
+      }
     }
   };
 
@@ -264,12 +375,19 @@ export default function App() {
 
   const HeaderActions = () => (
     <View style={styles.headerActions}>
+      {Platform.OS === 'web' && (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity onPress={() => navigateTo('Home')} style={styles.webNavLink}>
+            <Text style={[styles.webNavLinkText, { color: theme.secondaryText }]}>HOME</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('Shop')} style={styles.webNavLink}>
+            <Text style={[styles.webNavLinkText, { color: theme.secondaryText }]}>SHOP</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <TouchableOpacity onPress={toggleTheme} style={styles.headerIconButton}>
-        <Ionicons
-          name={themeMode === 'system' ? 'settings-outline' : (themeMode === 'dark' ? 'moon' : 'sunny')}
-          size={20}
-          color={theme.icon}
-        />
+        <Ionicons name={themeMode === 'system' ? 'settings-outline' : (themeMode === 'dark' ? 'moon' : 'sunny')} size={20} color={theme.icon} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.headerIconButton} onPress={() => navigateTo('Cart')}>
@@ -282,13 +400,21 @@ export default function App() {
       </TouchableOpacity>
 
       {isLoggedIn ? (
-        <TouchableOpacity onPress={() => navigateTo('Settings')} style={styles.headerIconButton}>
+        <TouchableOpacity onPress={() => navigateTo('Settings')} style={[styles.headerIconButton, styles.profileBtn]}>
           <Ionicons name="person-circle-outline" size={24} color={theme.icon} />
+          {Platform.OS === 'web' && (
+            <Text style={[styles.webNavLinkText, { color: theme.text, marginLeft: 4 }]}>PROFILE & HISTORY</Text>
+          )}
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity onPress={() => navigateTo('Auth')} style={styles.loginButton}>
-          <Text style={styles.loginButtonText}>LOG IN</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => navigateTo('Auth')} style={[styles.loginButton, { marginRight: 8, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.accent }]}>
+            <Text style={[styles.loginButtonText, { color: theme.accent }]}>LOG IN</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigateTo('Auth')} style={[styles.loginButton, { backgroundColor: theme.accent }]}>
+            <Text style={styles.loginButtonText}>SIGN UP</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -365,8 +491,10 @@ export default function App() {
             onBuy={onBuy}
             onProductSelect={handleProductSelect}
             allProducts={allProducts}
+            categories={categories}
             onScroll={handleScroll}
             wishlist={wishlist}
+            preferredCategories={preferredCategories}
             toggleWishlist={toggleWishlist}
           />
         );
@@ -395,9 +523,22 @@ export default function App() {
       case 'Feedback':
         return <FeedbackPage theme={theme} isDark={isDark} onNavigate={navigateTo} />;
       case 'Settings':
-        return <ProfileSettings onNavigate={navigateTo} onLogout={handleLogout} theme={theme} isDark={isDark} userProfile={userProfile} setUserProfile={setUserProfile} />;
+        return <ProfileSettings
+          onNavigate={navigateTo}
+          onLogout={handleLogout}
+          theme={theme}
+          isDark={isDark}
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          activityHistory={activityHistory}
+          onProductSelect={handleProductSelect}
+        />;
       case 'Auth':
         return <AuthPage onNavigate={navigateTo} onLogin={handleLogin} theme={theme} isDark={isDark} />;
+      case 'AddressBook':
+        return <AddressBook userProfile={userProfile} theme={theme} isDark={isDark} onNavigate={navigateTo} />;
+      case 'OrderHistory':
+        return <OrderHistory userProfile={userProfile} theme={theme} isDark={isDark} onNavigate={navigateTo} />;
       case 'Shop':
         const filteredData = (selectedCategory === 'All'
           ? allProducts
@@ -405,15 +546,18 @@ export default function App() {
         ).filter(item => !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
         return (
-          <SafeAreaView style={[styles.shopContainer, { backgroundColor: theme.background }]}>
+          <View style={[styles.shopContainer, styles.safeContainer, { backgroundColor: theme.background }]}>
             <View style={[styles.shopHeader, { borderBottomColor: theme.border }]}>
               <TouchableOpacity style={styles.backButton} onPress={goBack}>
                 <Ionicons name="arrow-back" size={24} color={theme.accent} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => navigateTo('Home')}>
-                <Text style={[styles.shopHeaderTitle, { color: theme.text }]}>GMK CATALOG</Text>
+                <Text style={[styles.shopHeaderTitle, { color: theme.text }]}>KweliStoreKenya CATALOG</Text>
               </TouchableOpacity>
               <View style={styles.headerRight}>
+                <TouchableOpacity onPress={fetchProducts} style={{ padding: 8, marginRight: 4 }}>
+                  <Ionicons name="refresh" size={20} color={theme.accent} />
+                </TouchableOpacity>
                 <HeaderActions />
               </View>
             </View>
@@ -444,7 +588,7 @@ export default function App() {
               }
             ]}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-                {['All', 'Necklaces', 'Bracelets', 'Anklets', 'Souvenirs'].map(cat => (
+                {categories.map(cat => (
                   <TouchableOpacity
                     key={cat}
                     onPress={() => setSelectedCategory(cat)}
@@ -482,7 +626,7 @@ export default function App() {
                 toggleWishlist={toggleWishlist}
               />
             )}
-          </SafeAreaView>
+          </View>
         );
       case 'ProductDetail':
         return (
@@ -506,7 +650,7 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, styles.safeContainer, { backgroundColor: theme.background }]}>
       <StatusBar style={isDark ? "light" : "dark"} />
       <View style={{ flex: 1 }}>
         {renderScreen()}
@@ -517,13 +661,16 @@ export default function App() {
           <Text style={styles.toastText}>{toastMessage}</Text>
         </Animated.View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  safeContainer: {
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 40) : 0,
   },
   shopContainer: {
     flex: 1,
@@ -551,6 +698,19 @@ const styles = StyleSheet.create({
   headerRight: {
     position: 'absolute',
     right: 20,
+  },
+  webNavLink: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+  },
+  webNavLinkText: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 2,
+  },
+  profileBtn: {
+    paddingRight: 15,
+    backgroundColor: 'rgba(141, 166, 150, 0.1)',
   },
   headerActions: {
     flexDirection: 'row',

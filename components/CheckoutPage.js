@@ -8,18 +8,17 @@ import { Ionicons } from '@expo/vector-icons';
 const STEPS = ['Address', 'Payment', 'Confirm'];
 
 const PAYMENT_METHODS = [
-    { id: 'mpesa', label: 'M-Pesa', icon: 'phone-portrait-outline', desc: 'Pay via M-Pesa Paybill' },
-    { id: 'card', label: 'Card', icon: 'card-outline', desc: 'Visa / Mastercard' },
+    { id: 'direct', label: 'Direct Payment', icon: 'people-outline', desc: 'Pay directly to the provider' },
     { id: 'cash', label: 'Cash on Delivery', icon: 'cash-outline', desc: 'Pay when item arrives' },
 ];
 
 const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
     const [step, setStep] = useState(0);
     const [address, setAddress] = useState({ name: '', phone: '', county: '', town: '', street: '' });
-    const [payMethod, setPayMethod] = useState('mpesa');
-    const [mpesaCode, setMpesaCode] = useState('');
+    const [payMethod, setPayMethod] = useState('direct');
     const [mpesaPhone, setMpesaPhone] = useState('');
     const [ordered, setOrdered] = useState(false);
+    const [inquiryVerified, setInquiryVerified] = useState(false);
 
     const total = cart.reduce((sum, item) => {
         const num = parseInt(String(item.price).replace('KSh ', '').replace(',', '')) || 0;
@@ -122,12 +121,25 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                 </TouchableOpacity>
             ))}
 
-            {payMethod === 'mpesa' && (
+            {payMethod === 'direct' && (
                 <View style={[styles.mpesaBox, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>M-Pesa Paybill</Text>
-                    <Text style={[styles.mpesaDetail, { color: theme.accent }]}>Paybill: 522522 • Acc: GMKENYA</Text>
+                    <Text style={[styles.label, { color: theme.text }]}>Direct Provider Transaction</Text>
+                    <Text style={[styles.mpesaDetail, { color: theme.accent, fontSize: 13, fontWeight: '700' }]}>
+                        You will handle the payment directly with the provider(s) of the items.
+                    </Text>
 
-                    <Text style={[styles.label, { color: theme.text, marginTop: 15 }]}>M-Pesa Phone Number</Text>
+                    <View style={{ marginTop: 15, padding: 10, backgroundColor: theme.background, borderRadius: 8 }}>
+                        <Text style={[styles.label, { color: theme.secondaryText, fontSize: 11 }]}>PROVIDER CONTACT(S)</Text>
+                        {[...new Set(cart.map(item => item.provider_contact))].map((contact, idx) => (
+                            <TouchableOpacity key={idx} onPress={() => Linking.openURL(`tel:${contact}`)}>
+                                <Text style={[styles.mpesaDetail, { color: theme.accent, fontSize: 15 }]}>
+                                    📞 {contact || 'Contact details during upload'}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <Text style={[styles.label, { color: theme.text, marginTop: 15 }]}>Your M-Pesa Number (For reference)</Text>
                     <TextInput
                         style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: theme.background }]}
                         value={mpesaPhone}
@@ -135,16 +147,6 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                         placeholder="e.g. 0712 345 678"
                         placeholderTextColor={theme.secondaryText}
                         keyboardType="phone-pad"
-                    />
-
-                    <Text style={[styles.label, { color: theme.text, marginTop: 15 }]}>Enter M-Pesa Code</Text>
-                    <TextInput
-                        style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: theme.background }]}
-                        value={mpesaCode}
-                        onChangeText={setMpesaCode}
-                        placeholder="e.g. QHX3K1ABCD"
-                        placeholderTextColor={theme.secondaryText}
-                        autoCapitalize="characters"
                     />
                 </View>
             )}
@@ -190,13 +192,25 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                 <Text style={[styles.confirmDetail, { color: theme.text }]}>{address.name} • {address.phone}</Text>
                 <Text style={[styles.confirmDetail, { color: theme.secondaryText }]}>{address.street ? `${address.street}, ` : ''}{address.town}, {address.county}</Text>
                 <Text style={[styles.confirmDetail, { color: theme.text, marginTop: 8 }]}>Payment: <Text style={{ color: theme.accent, fontWeight: '700' }}>{PAYMENT_METHODS.find(p => p.id === payMethod)?.label}</Text></Text>
-                {payMethod === 'mpesa' && (
-                    <>
-                        <Text style={[styles.confirmDetail, { color: theme.text, marginTop: 4 }]}>M-Pesa Number: <Text style={{ color: theme.accent, fontWeight: '700' }}>{mpesaPhone || 'N/A'}</Text></Text>
-                        <Text style={[styles.confirmDetail, { color: theme.text, marginTop: 4 }]}>M-Pesa Code: <Text style={{ color: theme.accent, fontWeight: '700' }}>{mpesaCode || 'N/A'}</Text></Text>
-                    </>
+                {payMethod === 'direct' && (
+                    <Text style={[styles.confirmDetail, { color: theme.text, marginTop: 4 }]}>Transaction with: <Text style={{ color: theme.accent, fontWeight: '700' }}>Provider Direct</Text></Text>
                 )}
             </View>
+
+            {/* Inquiry Verification */}
+            <TouchableOpacity
+                style={[styles.verificationBox, { borderColor: inquiryVerified ? '#4caf50' : theme.border, backgroundColor: theme.cardBackground }]}
+                onPress={() => setInquiryVerified(!inquiryVerified)}
+            >
+                <Ionicons
+                    name={inquiryVerified ? "checkbox" : "square-outline"}
+                    size={24}
+                    color={inquiryVerified ? "#4caf50" : theme.secondaryText}
+                />
+                <Text style={[styles.verificationText, { color: theme.text }]}>
+                    I have contacted the seller and we have agreed on this purchase details.
+                </Text>
+            </TouchableOpacity>
 
             <View style={styles.rowBtns}>
                 <TouchableOpacity style={[styles.backBtn, { borderColor: theme.border }]} onPress={() => setStep(1)}>
@@ -204,8 +218,18 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                     <Text style={[styles.backBtnText, { color: theme.accent }]}>BACK</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[styles.nextBtn, { backgroundColor: '#4caf50', flex: 1, marginLeft: 12 }]}
-                    onPress={handlePlaceOrder}
+                    style={[
+                        styles.nextBtn,
+                        { backgroundColor: inquiryVerified ? '#4caf50' : theme.border, flex: 1, marginLeft: 12 }
+                    ]}
+                    onPress={() => {
+                        if (inquiryVerified) {
+                            handlePlaceOrder();
+                        } else {
+                            Alert.alert("Contact Required", "Please contact the seller first and check the verification box to proceed.");
+                        }
+                    }}
+                    disabled={!inquiryVerified}
                 >
                     <Text style={styles.nextBtnText}>PLACE ORDER 🎉</Text>
                 </TouchableOpacity>
@@ -307,6 +331,21 @@ const styles = StyleSheet.create({
     confirmDetail: { fontSize: 14, lineHeight: 22 },
     successTitle: { fontSize: 30, fontWeight: '900', marginTop: 20 },
     successSub: { fontSize: 15, textAlign: 'center', marginTop: 12, lineHeight: 24 },
+    verificationBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        borderRadius: 12,
+        borderWidth: 2,
+        marginTop: 15,
+        borderStyle: 'dashed',
+    },
+    verificationText: {
+        fontSize: 13,
+        fontWeight: '600',
+        marginLeft: 10,
+        flex: 1,
+    }
 });
 
 export default CheckoutPage;

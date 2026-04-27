@@ -78,7 +78,7 @@ const ProductCard = ({ item, theme, isDark, onBuy, onProductPress, variant = 'mo
                 <Text style={styles.itemTitle}>{item.title}</Text>
                 <TouchableOpacity
                   style={[styles.buyBtn, { backgroundColor: theme.accent }]}
-                  onPress={() => onBuy(item)}
+                  onPress={() => onBuy(item, true)}
                 >
                   <Text style={styles.buyBtnText}>BUY NOW</Text>
                 </TouchableOpacity>
@@ -96,13 +96,25 @@ const ProductCard = ({ item, theme, isDark, onBuy, onProductPress, variant = 'mo
               ))}
               <Text style={[styles.reviewsCount, { color: theme.secondaryText }]}>({item.reviewsCount || 0})</Text>
             </View>
+            {item.uploader_name && (
+              <View style={styles.providerRow}>
+                <Ionicons name="shield-checkmark" size={10} color={theme.accent} />
+                <Text style={[styles.providerSmallText, { color: theme.accent }]}>{item.uploader_name}</Text>
+              </View>
+            )}
             <View style={styles.ecommerceFooter}>
               <Text style={[styles.ecommercePrice, { color: theme.accent }]}>{item.price}</Text>
               <TouchableOpacity
-                style={[styles.smallBuyBtn, { backgroundColor: theme.accent }]}
-                onPress={() => onBuy(item)}
+                style={[styles.ecommerceBuyBtn, { backgroundColor: theme.accent }]}
+                onPress={() => onBuy(item, true)}
               >
-                <Ionicons name="cart" size={14} color="#fff" />
+                <Text style={styles.ecommerceBuyText}>BUY</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.smallBuyBtn, { backgroundColor: theme.cardBackground, borderColor: theme.accent, borderWidth: 1 }]}
+                onPress={() => onBuy(item, false)}
+              >
+                <Ionicons name="cart" size={14} color={theme.accent} />
               </TouchableOpacity>
             </View>
           </View>
@@ -222,6 +234,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '900',
   },
+  ecommerceBuyBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    marginRight: 6,
+  },
+  ecommerceBuyText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '900',
+  },
   smallBuyBtn: {
     width: 32,
     height: 32,
@@ -243,6 +266,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 6,
     zIndex: 10,
+  },
+  providerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    paddingHorizontal: 2,
+  },
+  providerSmallText: {
+    fontSize: 9,
+    fontWeight: '700',
+    marginLeft: 4,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase'
   }
 });
 

@@ -23,12 +23,12 @@ const AboutUsPage = ({ theme, isDark, onNavigate }) => {
                 <View style={styles.textContainer}>
                     <Text style={[styles.title, { color: theme.text }]}>Our Dedication to Quality</Text>
                     <Text style={[styles.paragraph, { color: theme.secondaryText }]}>
-                        At Gift Masters Kenya, our driving force is a relentless dedication to providing only the best products the market has to offer. We believe that true quality speaks for itself, and we pour our passion into sourcing and curating traditional, premium handcrafted goods that resonate with our rich heritage.
+                        At KweliStoreKenya, our driving force is a relentless dedication to providing only the best products the market has to offer. We believe that true quality speaks for itself, and we pour our passion into sourcing and curating traditional, premium handcrafted goods that resonate with our rich heritage.
                     </Text>
 
                     <Text style={[styles.subtitle, { color: theme.text }]}>The Best in the Market</Text>
                     <Text style={[styles.paragraph, { color: theme.secondaryText }]}>
-                        We don't just sell souvenirs; we deliver memorable experiences crafted carefully by skilled artisans. Our commitment means every bracelet, necklace, and keychain we offer is thoroughly tested for durability, authenticity, and aesthetic appeal. When you choose us, you are choosing unmatched craftsmanship.
+                        We don't just sell products; we deliver memorable experiences through quality goods and professional services. Our commitment means every item we offer is thoroughly tested for durability, authenticity, and aesthetic appeal. When you choose us, you are choosing unmatched craftsmanship and reliability.
                     </Text>
 
                     <Text style={[styles.subtitle, { color: theme.text }]}>Why Choose Us?</Text>

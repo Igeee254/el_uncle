@@ -1,5 +1,6 @@
-from app import app, db
-from models import Category, Product
+from app import app
+from extensions import db
+from models import Category, Product, User, Address, Order, OrderItem, Feedback
 
 MOCK_DATA = [
   { "id": '1', "title": 'Arsenal Leather Bracelet', "price": 1500, "image": 'bracelet.png', "height": 260, "badgeColor": '#DB0007', "category": 'Bracelets', "rating": 5, "reviewsCount": 124 },
@@ -28,12 +29,20 @@ MOCK_DATA = [
   { "id": '8', "title": 'Arsenal Vintage Badge', "price": 1400, "image": 'keychain.png', "height": 310, "badgeColor": '#DB0007', "category": 'Souvenirs', "rating": 5, "reviewsCount": 27 },
   { "id": '25', "title": 'Elephant Ebony Statue', "price": 2500, "image": 'magnet.png', "height": 340, "badgeColor": '#212121', "category": 'Souvenirs', "rating": 4, "reviewsCount": 15 },
   { "id": '26', "title": 'Baobab Tree Keychain', "price": 950, "image": 'keychain.png', "height": 280, "badgeColor": '#8D6E63', "category": 'Souvenirs', "rating": 5, "reviewsCount": 52 },
+  { "id": '27', "title": 'Shea Butter Lotion', "price": 1200, "image": 'bracelet.png', "height": 250, "badgeColor": '#f48fb1', "category": 'Cosmetics', "rating": 4, "reviewsCount": 100 },
+  { "id": '28', "title": 'Silver Diamond Ring', "price": 8500, "image": 'beaded.png', "height": 220, "badgeColor": '#E0E0E0', "category": 'Jewelries', "rating": 5, "reviewsCount": 42 },
+  { "id": '29', "title": 'AirPods Pro Case', "price": 900, "image": 'keychain.png', "height": 200, "badgeColor": '#9e9e9e', "category": 'Electronics', "rating": 4, "reviewsCount": 210 },
+  { "id": '30', "title": 'African Print Hoodie', "price": 3500, "image": 'beaded.png', "height": 300, "badgeColor": '#3f51b5', "category": 'Clothing', "rating": 5, "reviewsCount": 78 },
+  { "id": '31', "title": 'Woven Wall Basket', "price": 1800, "image": 'magnet.png', "height": 310, "badgeColor": '#795548', "category": 'Home Decor', "rating": 4, "reviewsCount": 35 },
+  { "id": '32', "title": 'Maasai Mara Canvas Print', "price": 4500, "image": 'beaded.png', "height": 350, "badgeColor": '#ff5722', "category": 'Art', "rating": 5, "reviewsCount": 12 },
 ]
 
 def seed_db():
     with app.app_context():
-        # db.create_all() is called by app.py automatically if models imported there,
-        # but let's make sure:
+        # Force recreation to apply schema changes (like provider_contact)
+        print("Dropping all tables...")
+        db.drop_all()
+        print("Creating all tables...")
         db.create_all()
         
         # Clear existing to prevent duplicates during testing
@@ -58,11 +67,27 @@ def seed_db():
                 height=item['height'],
                 badge_color=item['badgeColor'],
                 rating=item['rating'],
-                reviews_count=item['reviewsCount']
+                reviews_count=item['reviewsCount'],
+                provider_contact='+254 746 860 965' # Default mock contact
             )
             db.session.add(p)
+            print(f"Added product: {p.title}")
+
+        # Add Admin User
+        from models import User
+        if not User.query.filter_by(email='admin@kwelistore.com').first():
+            admin = User(
+                username='KweliAdmin',
+                email='admin@kwelistore.com',
+                password_hash='admin123',
+                phone='+254 746 860 965',
+                is_admin=True
+            )
+            db.session.add(admin)
+            print("Added admin user: admin@kwelistore.com")
             
         db.session.commit()
+        print(f"COMMITTED {len(MOCK_DATA)} products to the database.")
         print("Database seeded successfully with MOCK_DATA.")
 
 if __name__ == '__main__':

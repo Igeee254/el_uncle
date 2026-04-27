@@ -115,6 +115,20 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                         <Text style={[styles.title, { color: theme.text }]}>{product.title}</Text>
                         <Text style={[styles.category, { color: theme.accent }]}>Premium Souvenir Collection</Text>
 
+                        {product.uploader_name ? (
+                            <View style={styles.providerBadge}>
+                                <Ionicons name="shield-checkmark-outline" size={16} color={theme.accent} />
+                                <Text style={[styles.providerText, { color: theme.accent, fontWeight: '700' }]}>Service by: {product.uploader_name}</Text>
+                            </View>
+                        ) : null}
+
+                        {product.provider_contact ? (
+                            <View style={styles.providerBadge}>
+                                <Ionicons name="call-outline" size={16} color={theme.secondaryText} />
+                                <Text style={[styles.providerText, { color: theme.secondaryText }]}>Contact: {product.provider_contact}</Text>
+                            </View>
+                        ) : null}
+
                         {isDesktop && (
                             <Text style={[styles.desktopPrice, { color: theme.text }]}>{currentPrice}</Text>
                         )}
@@ -178,12 +192,21 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                             </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity
-                            style={[styles.buyButton, { backgroundColor: theme.accent }]}
-                            onPress={() => onBuy({ ...product, price: currentPrice, variety: selectedVariety.label, color: selectedColor.name, quantity })}
-                        >
-                            <Text style={styles.buyButtonText}>ADD TO CART — KSh {((basePriceNum + selectedVariety.priceOffset) * quantity).toLocaleString()}</Text>
-                        </TouchableOpacity>
+                        <View style={styles.actionRow}>
+                            <TouchableOpacity
+                                style={[styles.buyButton, { backgroundColor: theme.accent, flex: 2 }]}
+                                onPress={() => onBuy({ ...product, price: currentPrice, variety: selectedVariety.label, color: selectedColor.name, quantity }, true)}
+                            >
+                                <Text style={styles.buyButtonText}>INQUIRE TO BUY</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.cartButton, { borderColor: theme.accent, flex: 1, borderWidth: 2 }]}
+                                onPress={() => onBuy({ ...product, price: currentPrice, variety: selectedVariety.label, color: selectedColor.name, quantity }, false)}
+                            >
+                                <Ionicons name="cart-outline" size={24} color={theme.accent} />
+                            </TouchableOpacity>
+                        </View>
 
                         <View style={styles.divider} />
 
@@ -213,7 +236,12 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
             {/* Floating WhatsApp Button */}
             <TouchableOpacity
                 style={styles.whatsappBtn}
-                onPress={() => Linking.openURL('https://wa.me/254700000000?text=Hi! I\'m interested in ' + encodeURIComponent(product.title))}
+                onPress={() => {
+                    const contact = product.provider_contact || '254700000000'; // Fallback
+                    const cleanContact = contact.replace(/\D/g, ''); // Remove non-numeric
+                    const message = encodeURIComponent(`Hi! I'm interested in purchasing the "${product.title}". Is it available?`);
+                    Linking.openURL(`https://wa.me/${cleanContact}?text=${message}`);
+                }}
             >
                 <Ionicons name="logo-whatsapp" size={28} color="#fff" />
             </TouchableOpacity>
@@ -387,6 +415,18 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         letterSpacing: 1,
     },
+    actionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    cartButton: {
+        height: 58,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 15,
+    },
     quantityContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -424,6 +464,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 5,
         zIndex: 999,
+    },
+    providerBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    providerText: {
+        fontSize: 12,
+        fontWeight: '600',
+        marginLeft: 5,
     }
 });
 
