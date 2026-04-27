@@ -37,9 +37,9 @@ mail = Mail(app)
 
 # ----------------- CLOUDINARY SETUP -----------------
 cloudinary.config(
-  cloud_name = "Root",
-  api_key = "477191774921971",
-  api_secret = "sIpLN2GwghfpYVthAB_D9l4DbkA",
+  cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME', 'Root'),
+  api_key = os.getenv('CLOUDINARY_API_KEY', '477191774921971'),
+  api_secret = os.getenv('CLOUDINARY_API_SECRET', 'sIpLN2GwghfpYVthAB_D9l4DbkA'),
   secure = True
 )
 
@@ -624,7 +624,11 @@ if __name__ == '__main__':
             print("✅ Database tables verified/created successfully.")
         except Exception as e:
             print("❌ DATABASE ERROR: Could not connect to MySQL.")
-            print("👉 Please make sure XAMPP / MySQL is RUNNING and the 'el_uncle' database exists.")
             print(f"Error details: {e}")
 
     app.run(host='0.0.0.0', port=5000, debug=True)
+else:
+    # THIS PART IS CRITICAL FOR RENDER: Initialize DB when Gunicorn starts the app
+    with app.app_context():
+        from models import Category, Product, Order, OrderItem, User 
+        db.create_all()
