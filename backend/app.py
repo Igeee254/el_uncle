@@ -629,6 +629,15 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 else:
     # THIS PART IS CRITICAL FOR RENDER: Initialize DB when Gunicorn starts the app
+    import sys
+    import traceback
     with app.app_context():
-        from models import Category, Product, Order, OrderItem, User 
-        db.create_all()
+        try:
+            from models import Category, Product, Order, OrderItem, User 
+            db.create_all()
+            print("🚀 Database connected and tables created!", file=sys.stderr)
+            sys.stderr.flush()
+        except Exception as e:
+            print("❌ FATAL DB ERROR DURING STARTUP:", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            sys.stderr.flush()
