@@ -1,0 +1,10 @@
+﻿{
+  "expo": {
+    "name": "KweliStore Admin",
+    "slug": "kwelistore-admin",
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    }
+  }
+}

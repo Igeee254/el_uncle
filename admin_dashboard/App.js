@@ -11,7 +11,8 @@ const theme = {
     card: '#ffffff',
     text: '#2d3436',
     secondary: '#636e72',
-    accent: '#8da696',
+    accent: '#F15A24', // Kweli Orange
+    primaryGreen: '#2E7D32', // Kweli Green
     error: '#ff7675',
     success: '#55efc4',
     border: '#dfe6e9'
@@ -103,7 +104,7 @@ export default function App() {
 
     const [productForm, setProductForm] = useState({
         title: '', price: '', category_id: '', image_uri: 'bracelet.png',
-        stock: '10', height: '220', badgeColor: '#8da696', provider_contact: '', uploader_id: null
+        stock: '10', height: '220', badgeColor: '#2E7D32', provider_contact: '', uploader_id: null
     });
 
     useEffect(() => { checkAuth(); }, []);
