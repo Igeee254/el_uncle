@@ -141,7 +141,7 @@ export default function App() {
   const fetchProducts = useCallback(async () => {
     setIsLoadingProducts(true);
     try {
-      const url = `${API_URL}/api/products`;
+      const url = `${API_URL}/products`;
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
       const data = await response.json();
@@ -196,7 +196,7 @@ export default function App() {
 
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/categories`);
+        const response = await fetch(`${API_URL}/categories`);
         if (response.ok) {
           const data = await response.json();
           const catNames = ['All', ...data.map(c => c.name)];
