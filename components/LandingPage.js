@@ -50,10 +50,10 @@ const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
                                 style={styles.heroBackground}
                                 imageStyle={styles.heroBackgroundImage}
                             >
-                                <View style={[styles.cardOverlay, { backgroundColor: isDark ? 'rgba(46, 125, 50, 0.3)' : 'rgba(241, 90, 36, 0.15)' }]}>
-                                    <Text style={styles.headline}>Welcome to KweliStoreKenya</Text>
+                                <View style={[styles.cardOverlay, { backgroundColor: 'rgba(0,0,0,0.55)' }]}>
+                                    <Text style={[styles.headline, { fontSize: isMobile ? 28 : 50 }]}>Welcome to KweliStoreKenya</Text>
                                     <TouchableOpacity style={styles.button} onPress={() => onNavigate('Home')}>
-                                        <Text style={styles.buttonText}>Get Started</Text>
+                                        <Text style={styles.buttonText}>Start Shopping</Text>
                                     </TouchableOpacity>
                                 </View>
                             </ImageBackground>
@@ -64,13 +64,13 @@ const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
 
             {/* 2. CAROUSEL SECTION */}
             <View style={[styles.carouselSection, { backgroundColor: theme.background }]}>
-                <Text style={[styles.sectionTitle, { color: theme.text }]}>Discover Our Heritage</Text>
-                <Text style={[styles.sectionSubtitle, { color: theme.secondaryText }]}>Handcrafted bracelets for the modern explorer.</Text>
+                <Text style={[styles.sectionTitle, { color: theme.text, fontSize: isMobile ? 22 : 32 }]}>Discover Our Marketplace</Text>
+                <Text style={[styles.sectionSubtitle, { color: theme.secondaryText, fontSize: isMobile ? 13 : 16 }]}>Handpicked quality products from Kenya's finest sellers.</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carouselContainer}>
                     {CAROUSEL_ITEMS.map((item) => (
                         <TouchableOpacity key={item.id} style={styles.carouselItem} onPress={() => onNavigate('Shop')}>
                             <Image source={item.image} style={styles.carouselImage} />
-                            <Text style={[styles.carouselText, { color: theme.text }]}>{item.title}</Text>
+                            <Text style={[styles.carouselText, { color: theme.text, backgroundColor: 'rgba(0,0,0,0.07)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }]}>{item.title}</Text>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
@@ -182,19 +182,19 @@ const styles = StyleSheet.create({
         textShadowRadius: 10
     },
     button: {
-        backgroundColor: '#fff',
-        paddingVertical: 18,
-        paddingHorizontal: 50,
+        backgroundColor: '#F15A24',
+        paddingVertical: 14,
+        paddingHorizontal: 40,
         borderRadius: 35,
         elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.2,
         shadowRadius: 3,
     },
     buttonText: {
-        color: '#F15A24', // Store Orange
-        fontSize: 18,
+        color: '#fff',
+        fontSize: 16,
         fontWeight: 'bold',
         textTransform: 'uppercase',
     },
