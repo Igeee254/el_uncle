@@ -8,7 +8,9 @@ export const lightTheme = {
     cardBackground: '#f8f9fa',
     text: '#2d3436',
     secondaryText: '#636e72',
-    accent: '#8da696',
+    accent: '#2E7D32', // Kweli Green
+    primary: '#F15A24', // Store Orange
+    highlight: '#E52D27', // Hot Red
     border: '#dfe6e9',
     icon: '#2d3436',
     authBackground: '#f1f2f6'
@@ -19,7 +21,9 @@ export const darkTheme = {
     cardBackground: '#1e1e1e',
     text: '#ffffff',
     secondaryText: '#b2bec3',
-    accent: '#8da696',
+    accent: '#2E7D32', // Kweli Green
+    primary: '#F15A24',
+    highlight: '#E52D27',
     border: '#2d3436',
     icon: '#ffffff',
     authBackground: '#0a0a0a'

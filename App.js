@@ -363,13 +363,14 @@ export default function App() {
   const theme = {
     background: isDark ? '#121212' : '#ffffff',
     text: isDark ? '#ffffff' : '#000000',
-    headerText: isDark ? '#e94560' : '#d81b60',
+    headerText: '#2E7D32', // Kweli Green for headers
     cardBackground: isDark ? '#1e1e1e' : '#f5f5f5',
     tabBar: isDark ? '#1a1a2e' : '#ffffff',
     border: isDark ? '#222' : '#eee',
     secondaryText: isDark ? '#aaa' : '#666',
     icon: isDark ? '#ffffff' : '#000000',
-    accent: '#8da696',
+    accent: '#F15A24', // Use Store Orange as the primary accent/button color
+    primaryGreen: '#2E7D32',
     authBackground: isDark ? '#0a0a0a' : '#f9f9f9',
   };
 
@@ -714,7 +715,7 @@ const styles = StyleSheet.create({
   },
   profileBtn: {
     paddingRight: 15,
-    backgroundColor: 'rgba(141, 166, 150, 0.1)',
+    backgroundColor: 'rgba(46, 125, 50, 0.1)', // use Green for profile bg
   },
   headerActions: {
     flexDirection: 'row',
@@ -729,7 +730,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginButton: {
-    backgroundColor: '#8da696',
+    backgroundColor: '#F15A24', // Use Orange for buttons
     paddingVertical: 6,
     paddingHorizontal: 15,
     borderRadius: 20,

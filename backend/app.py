@@ -242,7 +242,7 @@ def send_verification_email(email, username, token, is_admin=False):
         msg.html = f"""
         <div style="background-color: #f4f7f6; padding: 40px 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                <div style="background-color: #8da696; padding: 30px; text-align: center; color: #ffffff;">
+                <div style="background-color: #2E7D32; padding: 30px; text-align: center; color: #ffffff;">
                     <h1 style="margin: 0; font-size: 28px; letter-spacing: 1px;">KWELI STORE KENYA</h1>
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">MARKETPLACE & SERVICES</p>
                 </div>
@@ -251,7 +251,7 @@ def send_verification_email(email, username, token, is_admin=False):
                     <p style="font-size: 16px;">We're excited to have you on board! To finish setting up your account and ensure your security, please verify your email address by clicking the button below.</p>
                     
                     <div style="text-align: center; margin: 40px 0;">
-                        <a href="{verify_url}" style="display: inline-block; padding: 16px 36px; background-color: #8da696; color: #ffffff; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(141, 166, 150, 0.3); transition: all 0.3s ease;">Verify My Account</a>
+                        <a href="{verify_url}" style="display: inline-block; padding: 16px 36px; background-color: #F15A24; color: #ffffff; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(241, 90, 36, 0.3); transition: all 0.3s ease;">Verify My Account</a>
                     </div>
                     
                     <p style="font-size: 14px; color: #888;">If the button doesn't work, you can also copy and paste this link into your browser:</p>
@@ -411,7 +411,7 @@ def verify_admin(token):
             <h2 style="color:#333; margin-bottom: 10px; font-size: 28px;">Verification Successful!</h2>
             <p style="color:#666; font-size: 16px; margin-bottom: 40px;">Welcome, <strong>{user.username}</strong>. Your account is now active and ready to use.</p>
             
-            <a href="http://192.168.1.186:8081" style="display: inline-block; background-color: #8da696; color: white; padding: 18px 45px; border-radius: 40px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(141, 166, 150, 0.4);">CONTINUE TO MARKETPLACE</a>
+            <a href="http://192.168.1.186:8081" style="display: inline-block; background-color: #F15A24; color: white; padding: 18px 45px; border-radius: 40px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(241, 90, 36, 0.4);">CONTINUE TO MARKETPLACE</a>
             
             <p style="color:#888; font-size:14px; margin-top:30px;">You can now close this tab and return to the app.</p>
         </div>

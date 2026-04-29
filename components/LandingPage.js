@@ -50,7 +50,7 @@ const LandingPage = ({ onNavigate, theme, isDark, headerActions }) => {
                                 style={styles.heroBackground}
                                 imageStyle={styles.heroBackgroundImage}
                             >
-                                <View style={[styles.cardOverlay, { backgroundColor: isDark ? 'rgba(0,100,200,0.3)' : 'rgba(60,180,231,0.2)' }]}>
+                                <View style={[styles.cardOverlay, { backgroundColor: isDark ? 'rgba(46, 125, 50, 0.3)' : 'rgba(241, 90, 36, 0.15)' }]}>
                                     <Text style={styles.headline}>Welcome to KweliStoreKenya</Text>
                                     <TouchableOpacity style={styles.button} onPress={() => onNavigate('Home')}>
                                         <Text style={styles.buttonText}>Get Started</Text>
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
     },
     buttonText: {
-        color: '#3cb4e7',
+        color: '#F15A24', // Store Orange
         fontSize: 18,
         fontWeight: 'bold',
         textTransform: 'uppercase',

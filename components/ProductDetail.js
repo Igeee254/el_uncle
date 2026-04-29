@@ -25,7 +25,7 @@ const VARIETIES = [
 ];
 
 const COLORS = [
-    { id: 'c1', name: 'Original', hex: '#8da696' },
+    { id: 'c1', name: 'Original', hex: '#2E7D32' },
     { id: 'c2', name: 'Ebony', hex: '#1a1a1a' },
     { id: 'c3', name: 'Ocean', hex: '#0077be' },
     { id: 'c4', name: 'Sunset', hex: '#ff5e62' },

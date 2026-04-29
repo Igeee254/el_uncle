@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platfo
 import { Ionicons } from '@expo/vector-icons';
 
 const AuthPage = ({ onNavigate, onLogin, theme, isDark }) => {
-    const API_URL = 'http://192.168.1.186:5000/api';
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle-backend.onrender.com/api';
     const [isLogin, setIsLogin] = useState(true);
     const [isVerifying, setIsVerifying] = useState(false);
     const [nickname, setNickname] = useState('');
@@ -93,7 +93,7 @@ const AuthPage = ({ onNavigate, onLogin, theme, isDark }) => {
                                 Click it to activate your account.
                             </Text>
 
-                            <TouchableOpacity style={[styles.submitButton, { backgroundColor: '#4caf50' }]} onPress={checkVerificationStatus} disabled={loading}>
+                            <TouchableOpacity style={[styles.submitButton, { backgroundColor: '#2E7D32' }]} onPress={checkVerificationStatus} disabled={loading}>
                                 <Text style={styles.submitButtonText}>{loading ? 'CHECKING...' : "I'VE VERIFIED - LOG IN"}</Text>
                             </TouchableOpacity>
 
