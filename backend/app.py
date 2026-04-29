@@ -618,6 +618,15 @@ def admin_login():
     
     return jsonify({"error": "Invalid admin credentials"}), 401
 
+@app.route('/api/admin/hard-reset-db-kweli', methods=['GET'])
+def hard_reset_db():
+    try:
+        db.drop_all()
+        db.create_all()
+        return jsonify({"message": "DATABASE WIPED! All accounts are deleted. You can now sign up fresh."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/admin/stats', methods=['GET'])
 def get_admin_stats():
     from models import Product, Order
