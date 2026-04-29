@@ -196,9 +196,22 @@ export default function App() {
     const uploadImage = async (uri) => {
         setSubmitting(true);
         const formData = new FormData();
-        formData.append('file', { uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri, name: 'upload.jpg', type: 'image/jpeg' });
         try {
-            const res = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData, headers: { 'Content-Type': 'multipart/form-data' } });
+            if (Platform.OS === 'web') {
+                // On web: fetch the blob from the data/blob URI
+                const blobRes = await fetch(uri);
+                const blob = await blobRes.blob();
+                formData.append('file', blob, 'upload.jpg');
+            } else {
+                // On mobile
+                formData.append('file', {
+                    uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+                    name: 'upload.jpg',
+                    type: 'image/jpeg'
+                });
+            }
+
+            const res = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
             const data = await res.json();
             if (data.filename) {
                 setProductForm(prev => ({ ...prev, image_uri: data.filename }));
