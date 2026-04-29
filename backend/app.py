@@ -664,6 +664,18 @@ def update_stock():
         return jsonify({"message": "Stock updated", "stock": product.stock}), 200
     return jsonify({"error": "Product not found"}), 404
 
+@app.route('/api/admin/delete-product', methods=['POST'])
+def delete_product():
+    from models import Product
+    data = request.json
+    product_id = data.get('product_id')
+    product = Product.query.get(product_id)
+    if product:
+        db.session.delete(product)
+        db.session.commit()
+        return jsonify({"message": "Product deleted"}), 200
+    return jsonify({"error": "Product not found"}), 404
+
 @app.route('/api/admin/stats', methods=['GET'])
 def get_admin_stats():
     from models import Product, Order

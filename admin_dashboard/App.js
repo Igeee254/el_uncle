@@ -110,6 +110,7 @@ export default function App() {
     });
 
     useEffect(() => { checkAuth(); }, []);
+    useEffect(() => { if (isAuthenticated) fetchInventory(); }, [isAuthenticated, adminUser]);
 
     const checkAuth = async () => {
         try {
@@ -121,7 +122,7 @@ export default function App() {
         } catch (e) { } finally { setLoading(false); }
     };
 
-    const fetchData = async (userId) => {
+    const fetchData = async () => {
         try {
             const [statsRes, catRes] = await Promise.all([
                 fetch(`${API_URL}/admin/stats`),
@@ -129,17 +130,27 @@ export default function App() {
             ]);
             setStats(await statsRes.json());
             setCategories(await catRes.json());
-            fetchInventory(userId);
         } catch (e) { }
     };
 
-    const fetchInventory = async (userId) => {
-        const idToUse = userId || adminUser?.id;
-        if (!idToUse) return;
+    const fetchInventory = async () => {
+        if (!adminUser?.id) return;
         try {
-            const res = await fetch(`${API_URL}/admin/my-products?uploader_id=${idToUse}`);
+            const res = await fetch(`${API_URL}/admin/my-products?uploader_id=${adminUser.id}`);
             const data = await res.json();
-            setInventory(data);
+            setInventory(Array.isArray(data) ? data : []);
+        } catch (e) { }
+    };
+
+    const deleteProduct = async (productId) => {
+        if (!confirm("Are you sure you want to delete this product?")) return;
+        try {
+            const res = await fetch(`${API_URL}/admin/delete-product`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId })
+            });
+            if (res.ok) fetchInventory();
         } catch (e) { }
     };
 
@@ -158,7 +169,7 @@ export default function App() {
         setAdminUser(user);
         setProductForm(prev => ({ ...prev, uploader_id: user?.id }));
         setIsAuthenticated(true);
-        fetchData(user.id);
+        fetchData();
     };
 
     const handleLogout = async () => {
@@ -292,19 +303,24 @@ export default function App() {
                     {showInventory && (
                         <View style={{ marginTop: 20 }}>
                             <Text style={styles.formTitle}>MY INVENTORY</Text>
-                            {inventory.map(item => (
-                                <View key={item.id} style={styles.inventoryItem}>
-                                    <Image source={{ uri: item.image_uri }} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 10 }} />
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{ fontSize: 13, fontWeight: 'bold' }}>{item.title}</Text>
-                                        <Text style={{ fontSize: 11, color: theme.secondary }}>KSh {item.price} • Stock: {item.stock}</Text>
+                            {inventory.length === 0 ? (
+                                <Text style={{ textAlign: 'center', color: '#666', marginTop: 10 }}>No products found. Post your first item above!</Text>
+                            ) : (
+                                inventory.map(item => (
+                                    <View key={item.id} style={styles.inventoryItem}>
+                                        <Image source={{ uri: item.image_uri }} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 10 }} />
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontSize: 13, fontWeight: 'bold' }}>{item.title}</Text>
+                                            <Text style={{ fontSize: 11, color: theme.secondary }}>KSh {item.price} • Stock: {item.stock}</Text>
+                                        </View>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <TouchableOpacity onPress={() => updateStock(item.id, Math.max(0, item.stock - 1))} style={styles.stockBtn}><Ionicons name="remove" size={14} color="#fff" /></TouchableOpacity>
+                                            <TouchableOpacity onPress={() => updateStock(item.id, item.stock + 1)} style={[styles.stockBtn, { backgroundColor: theme.accent }]}><Ionicons name="add" size={14} color="#fff" /></TouchableOpacity>
+                                            <TouchableOpacity onPress={() => deleteProduct(item.id)} style={[styles.stockBtn, { backgroundColor: '#ff4757', marginLeft: 15 }]}><Ionicons name="trash" size={14} color="#fff" /></TouchableOpacity>
+                                        </View>
                                     </View>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                        <TouchableOpacity onPress={() => updateStock(item.id, Math.max(0, item.stock - 1))} style={styles.stockBtn}><Ionicons name="remove" size={14} color="#fff" /></TouchableOpacity>
-                                        <TouchableOpacity onPress={() => updateStock(item.id, item.stock + 1)} style={[styles.stockBtn, { backgroundColor: theme.accent }]}><Ionicons name="add" size={14} color="#fff" /></TouchableOpacity>
-                                    </View>
-                                </View>
-                            ))}
+                                ))
+                            )}
                         </View>
                     )}
                 </View>
