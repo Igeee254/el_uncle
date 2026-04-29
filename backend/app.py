@@ -234,7 +234,7 @@ def send_async_email(app, msg):
 
 def send_verification_email(email, username, token, is_admin=False):
     try:
-        verify_url = f"http://192.168.1.186:5000/api/admin/verify/{token}"
+        verify_url = f"https://el-uncle-backend.onrender.com/api/admin/verify/{token}"
         msg = Message(
             "Account Verification - KweliStoreKenya",
             recipients=[email]
@@ -411,7 +411,7 @@ def verify_admin(token):
             <h2 style="color:#333; margin-bottom: 10px; font-size: 28px;">Verification Successful!</h2>
             <p style="color:#666; font-size: 16px; margin-bottom: 40px;">Welcome, <strong>{user.username}</strong>. Your account is now active and ready to use.</p>
             
-            <a href="http://192.168.1.186:8081" style="display: inline-block; background-color: #F15A24; color: white; padding: 18px 45px; border-radius: 40px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(241, 90, 36, 0.4);">CONTINUE TO MARKETPLACE</a>
+            <a href="https://kwelistorekenya.netlify.app" style="display: inline-block; background-color: #F15A24; color: white; padding: 18px 45px; border-radius: 40px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(241, 90, 36, 0.4);">CONTINUE TO MARKETPLACE</a>
             
             <p style="color:#888; font-size:14px; margin-top:30px;">You can now close this tab and return to the app.</p>
         </div>

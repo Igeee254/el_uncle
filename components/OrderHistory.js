@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { Ionicons } from '@expo/vector-icons';
 
 const OrderHistory = ({ userProfile, theme, isDark, onNavigate }) => {
-    const API_URL = 'http://192.168.1.186:5000/api';
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle-backend.onrender.com/api';
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 

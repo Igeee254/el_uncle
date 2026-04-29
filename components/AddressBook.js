@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Activity
 import { Ionicons } from '@expo/vector-icons';
 
 const AddressBook = ({ userProfile, theme, isDark, onNavigate }) => {
-    const API_URL = 'http://192.168.1.186:5000/api';
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle-backend.onrender.com/api';
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
