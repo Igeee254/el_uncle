@@ -16,7 +16,7 @@ import AboutUsPage from './components/AboutUsPage';
 import AddressBook from './components/AddressBook';
 import OrderHistory from './components/OrderHistory';
 
-const API_URL = 'http://192.168.1.186:5000'; // Updated for physical phone connectivity
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.186:5000'; // Uses Render URL if available, else local IP
 
 const IMAGE_MAP = {
   'bracelet.png': require('./assets/bracelet.png'),
@@ -383,6 +383,10 @@ export default function App() {
           <TouchableOpacity onPress={() => navigateTo('Shop')} style={styles.webNavLink}>
             <Text style={[styles.webNavLinkText, { color: theme.secondaryText }]}>SHOP</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL('/KweliStore.apk')} style={[styles.webNavLink, styles.appDownloadBtn, { backgroundColor: theme.accent }]}>
+            <Ionicons name="logo-android" size={14} color="#fff" style={{ marginRight: 5 }} />
+            <Text style={[styles.webNavLinkText, { color: '#fff' }]}>GET APP</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -736,6 +740,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1,
+  },
+  appDownloadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 25,
+    marginLeft: 15,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cartBadge: {
     position: 'absolute',

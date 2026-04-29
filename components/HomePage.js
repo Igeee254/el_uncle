@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Image, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity, ScrollView, Image, useWindowDimensions, Platform, Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 
 import ProductCard from './ProductCard';
@@ -137,6 +137,30 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
                     ))}
                 </View>
             </View>
+
+            {/* 4. DOWNLOAD APP SECTION (Web Only) */}
+            {Platform.OS === 'web' && (
+                <View style={styles.downloadSection}>
+                    <View style={[styles.downloadContent, { backgroundColor: theme.accent }]}>
+                        <View style={styles.downloadTextContainer}>
+                            <Ionicons name="logo-android" size={40} color="#fff" />
+                            <Text style={styles.downloadTitle}>The KweliStore Experience,{"\n"}Everywhere.</Text>
+                            <Text style={styles.downloadSubtitle}>
+                                Get the official Android app for faster navigation, exclusive mobile offers, and instant order tracking.
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.downloadActionBtn}
+                                onPress={() => Linking.openURL('/KweliStore.apk')}
+                            >
+                                <Text style={[styles.downloadActionText, { color: theme.accent }]}>DOWNLOAD THE APK</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.downloadImageContainer}>
+                            <Ionicons name="phone-portrait-outline" size={200} color="rgba(255,255,255,0.2)" style={styles.phoneIconBg} />
+                        </View>
+                    </View>
+                </View>
+            )}
 
             <View style={{ height: 100 }} />
         </ScrollView>
@@ -294,6 +318,64 @@ const styles = StyleSheet.create({
     productGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+    },
+    downloadSection: {
+        paddingHorizontal: 20,
+        paddingVertical: 60,
+    },
+    downloadContent: {
+        flexDirection: 'row',
+        borderRadius: 20,
+        overflow: 'hidden',
+        minHeight: 280,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    downloadTextContainer: {
+        flex: 1,
+        padding: 40,
+        justifyContent: 'center',
+    },
+    downloadTitle: {
+        color: '#fff',
+        fontSize: 28,
+        fontWeight: '900',
+        marginTop: 15,
+        lineHeight: 34,
+    },
+    downloadSubtitle: {
+        color: 'rgba(255,255,255,0.85)',
+        fontSize: 14,
+        marginTop: 12,
+        marginBottom: 25,
+        lineHeight: 20,
+        maxWidth: 400,
+    },
+    downloadActionBtn: {
+        backgroundColor: '#fff',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 25,
+        paddingVertical: 12,
+        borderRadius: 30,
+    },
+    downloadActionText: {
+        fontWeight: '800',
+        fontSize: 13,
+        letterSpacing: 1,
+    },
+    downloadImageContainer: {
+        width: '30%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.05)',
+    },
+    phoneIconBg: {
+        position: 'absolute',
+        right: -40,
+        bottom: -40,
     }
 });
 
