@@ -59,13 +59,14 @@ function LoginScreen({ onLoginSuccess }) {
             if (response.ok) {
                 if (isLogin) {
                     await AsyncStorage.setItem('@admin_token', data.token);
-                    console.log('LOGIN SUCCESS! Moving to Dashboard...'); onLoginSuccess(data.admin);
+                    onLoginSuccess(data.admin);
                 } else {
-                    Alert.alert("Success", data.message);
-                    setIsLogin(true); // Switch back to login
+                    // Auto-login immediately after signup
+                    await AsyncStorage.setItem('@admin_token', data.token);
+                    onLoginSuccess(data.admin);
                 }
-            } else { Alert.alert("Failed", data.error || data.message || "Authentication failed"); }
-        } catch (e) { console.error('LOGIN ERROR:', e); Alert.alert('Error', 'Check Connection: ' + e.message); }
+            } else { showAlert("Failed", data.error || data.message || "Authentication failed"); }
+        } catch (e) { console.error('AUTH ERROR:', e); showAlert('Error', 'Check Connection: ' + e.message); }
         finally { setLoading(false); }
     };
 

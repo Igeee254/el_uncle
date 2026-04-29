@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Platform, TouchableOpacity, TextInput, useColorScheme, Alert, BackHandler, ScrollView, Linking, Animated } from 'react-native';
+import { StyleSheet, Text, View, Platform, TouchableOpacity, TextInput, useColorScheme, Alert, BackHandler, ScrollView, Linking, Animated, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MasonryGrid from './components/MasonryGrid';
@@ -374,9 +374,12 @@ export default function App() {
     authBackground: isDark ? '#0a0a0a' : '#f9f9f9',
   };
 
+  const { width } = useWindowDimensions();
+  const isMobileWeb = Platform.OS === 'web' && width < 768;
+
   const HeaderActions = () => (
     <View style={styles.headerActions}>
-      {Platform.OS === 'web' && (
+      {Platform.OS === 'web' && !isMobileWeb && (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity onPress={() => navigateTo('Home')} style={styles.webNavLink}>
             <Text style={[styles.webNavLinkText, { color: theme.secondaryText }]}>HOME</Text>

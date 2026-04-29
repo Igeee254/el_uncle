@@ -35,19 +35,14 @@ const AuthPage = ({ onNavigate, onLogin, theme, isDark }) => {
 
             const data = await response.json();
             if (response.ok) {
-                if (!isLogin) {
-                    setPendingEmail(email);
-                    setIsVerifying(true);
+                if (isLogin) {
+                    onLogin(data.user);
                 } else {
+                    // Auto-login immediately after signup — no extra step needed
                     onLogin(data.user);
                 }
             } else {
-                if (data.is_unverified) {
-                    setPendingEmail(email);
-                    setIsVerifying(true);
-                } else {
-                    alert(data.error || "Authentication failed");
-                }
+                alert(data.error || "Authentication failed");
             }
         } catch (e) {
             alert("Could not connect to server");

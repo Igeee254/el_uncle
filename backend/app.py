@@ -305,11 +305,16 @@ def admin_signup():
         db.session.add(new_user)
         db.session.commit()
         
-        email_sent = send_verification_email(email, username, token, is_admin=True)
-        if not email_sent:
-            return jsonify({"message": "Signup successful, but failed to send email. Check server logs.", "token": token}), 201
-            
-        return jsonify({"message": "Signup successful! You can now log in directly.", "token": token}), 201
+        return jsonify({
+            "message": "Signup successful! Welcome to KweliStore Admin.",
+            "token": "mock-admin-token-123",
+            "admin": {
+                "id": new_user.id,
+                "username": new_user.username,
+                "full_name": new_user.full_name,
+                "email": new_user.email
+            }
+        }), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -344,13 +349,18 @@ def client_signup():
         db.session.add(new_user)
         db.session.commit()
         
-        email_sent = send_verification_email(email, username, token, is_admin=False)
-        if not email_sent:
-            return jsonify({"message": "Signup successful, but failed to send email.", "token": token}), 201
-            
         return jsonify({
-            "message": "Signup successful! Verify your email to start shopping.",
-            "token": token
+            "message": "Signup successful! Welcome to KweliStoreKenya.",
+            "token": "mock-client-token-456",
+            "user": {
+                "id": new_user.id,
+                "username": new_user.username,
+                "full_name": new_user.full_name,
+                "email": new_user.email,
+                "phone": "",
+                "secondary_phone": "",
+                "email_notifications": True
+            }
         }), 201
     except Exception as e:
         db.session.rollback()
