@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, TextInput, Platform, Alert, ActivityIndicator, Image, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, TextInput, Platform, ActivityIndicator, Image, KeyboardAvoidingView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle.onrender.com/api';
+
+// Web-compatible alert helper
+const showAlert = (title, message) => {
+    if (typeof window !== 'undefined' && window.alert) {
+        window.alert(`${title}\n\n${message || ''}`);
+    }
+};
 
 const theme = {
     background: '#f8f9fa',
@@ -196,26 +203,26 @@ export default function App() {
             if (data.filename) {
                 setProductForm(prev => ({ ...prev, image_uri: data.filename }));
                 setSelectedImage(uri);
-                Alert.alert("Image Ready ✅", "Your image has been uploaded successfully! Now fill in the details and click POST.");
+                showAlert("Image Ready ✅", "Your image has been uploaded! Now fill in the details and click POST.");
             } else {
-                Alert.alert("Upload Failed ❌", data.error || "Image could not be uploaded to the server. Please try again.");
+                showAlert("Upload Failed ❌", data.error || "Image could not be uploaded. Please try again.");
             }
         } catch (e) {
-            Alert.alert("Network Error ❌", "Could not reach the server. Check your internet connection.");
+            showAlert("Network Error ❌", "Could not reach the server. Check your internet connection.");
         } finally { setSubmitting(false); }
     };
 
     const handleAddProduct = async () => {
         if (!productForm.title || !productForm.price) {
-            Alert.alert("Error", "Please enter a title and price");
+            showAlert("Error", "Please enter a title and price");
             return;
         }
         if (!productForm.category_id) {
-            Alert.alert("Error", "Please select a category");
+            showAlert("Error", "Please select a category");
             return;
         }
         if (productForm.image_uri === 'bracelet.png') {
-            Alert.alert("Caution", "You haven't uploaded an image yet! Please pick a photo first.");
+            showAlert("Caution", "You haven't uploaded an image yet! Please pick a photo first.");
             return;
         }
         setSubmitting(true);
@@ -227,19 +234,19 @@ export default function App() {
             });
             const data = await res.json();
             if (res.ok) {
-                Alert.alert("Success", "Product successfully posted to KweliStore!");
+                showAlert("Success ✅", "Product successfully posted to KweliStore!");
                 setProductForm({
                     title: '', price: '', category_id: '',
-                    image_uri: 'bracelet.png', // Reset to default
+                    image_uri: 'bracelet.png',
                     provider_contact: '', uploader_id: adminUser?.id
                 });
                 setSelectedImage(null);
                 fetchData();
             } else {
-                Alert.alert("Failed", data.error || "Could not add product");
+                showAlert("Failed ❌", data.error || "Could not add product");
             }
         } catch (e) {
-            Alert.alert("Error", "Network connection failed");
+            showAlert("Error", "Network connection failed");
         } finally { setSubmitting(false); }
     };
 
