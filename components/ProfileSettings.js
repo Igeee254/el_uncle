@@ -6,7 +6,7 @@ const APP_VERSION = 'v1.2.0';
 const SUPPORT_WHATSAPP = '+254 746 860 965';
 
 const ProfileSettings = ({ onNavigate, onLogout, theme, isDark, userProfile, setUserProfile, activityHistory, onProductSelect }) => {
-    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle-backend.onrender.com/api';
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle.onrender.com/api';
 
     const [fullName, setFullName] = useState(userProfile.full_name || '');
     const [nickname, setNickname] = useState(userProfile.username || '');

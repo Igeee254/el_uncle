@@ -16,7 +16,7 @@ import AboutUsPage from './components/AboutUsPage';
 import AddressBook from './components/AddressBook';
 import OrderHistory from './components/OrderHistory';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle-backend.onrender.com/api'; // Uses Render URL if available, else production default
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle.onrender.com/api'; // Uses Render URL if available, else production default
 
 const IMAGE_MAP = {
   'bracelet.png': require('./assets/bracelet.png'),

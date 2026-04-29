@@ -234,7 +234,7 @@ def send_async_email(app, msg):
 
 def send_verification_email(email, username, token, is_admin=False):
     try:
-        verify_url = f"https://el-uncle-backend.onrender.com/api/admin/verify/{token}"
+        verify_url = f"https://el-uncle.onrender.com/api/admin/verify/{token}"
         msg = Message(
             "Account Verification - KweliStoreKenya",
             recipients=[email]

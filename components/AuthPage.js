@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platfo
 import { Ionicons } from '@expo/vector-icons';
 
 const AuthPage = ({ onNavigate, onLogin, theme, isDark }) => {
-    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle-backend.onrender.com/api';
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle.onrender.com/api';
     const [isLogin, setIsLogin] = useState(true);
     const [isVerifying, setIsVerifying] = useState(false);
     const [nickname, setNickname] = useState('');
