@@ -102,6 +102,13 @@ const ProductCard = ({ item, theme, isDark, onBuy, onProductPress, variant = 'mo
                 <Text style={[styles.providerSmallText, { color: theme.accent }]}>{item.uploader_name}</Text>
               </View>
             )}
+
+            {/* Stock Indicator */}
+            <View style={{ marginTop: 4 }}>
+              <Text style={{ fontSize: 9, fontWeight: '700', color: item.stock > 0 ? (item.stock < 10 ? '#ff4757' : '#2E7D32') : '#666' }}>
+                {item.stock > 0 ? (item.stock < 10 ? `ONLY ${item.stock} LEFT!` : `${item.stock} IN STOCK`) : 'OUT OF STOCK'}
+              </Text>
+            </View>
             <View style={styles.ecommerceFooter}>
               <Text style={[styles.ecommercePrice, { color: theme.accent }]}>{item.price}</Text>
               <TouchableOpacity

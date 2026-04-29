@@ -634,6 +634,36 @@ def hard_reset_db():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/admin/my-products', methods=['GET'])
+def get_my_products():
+    from models import Product
+    uploader_id = request.args.get('uploader_id')
+    if not uploader_id:
+        return jsonify({"error": "Missing uploader_id"}), 400
+    
+    products = Product.query.filter_by(uploader_id=uploader_id).all()
+    return jsonify([{
+        "id": p.id,
+        "title": p.title,
+        "price": p.price,
+        "stock": p.stock,
+        "image_uri": p.image_uri
+    } for p in products])
+
+@app.route('/api/admin/update-stock', methods=['POST'])
+def update_stock():
+    from models import Product
+    data = request.json
+    product_id = data.get('product_id')
+    new_stock = data.get('stock')
+    
+    product = Product.query.get(product_id)
+    if product:
+        product.stock = int(new_stock)
+        db.session.commit()
+        return jsonify({"message": "Stock updated", "stock": product.stock}), 200
+    return jsonify({"error": "Product not found"}), 404
+
 @app.route('/api/admin/stats', methods=['GET'])
 def get_admin_stats():
     from models import Product, Order

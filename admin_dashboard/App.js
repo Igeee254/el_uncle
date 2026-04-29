@@ -101,6 +101,8 @@ export default function App() {
     const [categories, setCategories] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [inventory, setInventory] = useState([]);
+    const [showInventory, setShowInventory] = useState(false);
 
     const [productForm, setProductForm] = useState({
         title: '', price: '', category_id: '', image_uri: 'bracelet.png',
@@ -127,6 +129,27 @@ export default function App() {
             ]);
             setStats(await statsRes.json());
             setCategories(await catRes.json());
+            fetchInventory();
+        } catch (e) { }
+    };
+
+    const fetchInventory = async () => {
+        if (!adminUser?.id) return;
+        try {
+            const res = await fetch(`${API_URL}/admin/my-products?uploader_id=${adminUser.id}`);
+            const data = await res.json();
+            setInventory(data);
+        } catch (e) { }
+    };
+
+    const updateStock = async (productId, newStock) => {
+        try {
+            const res = await fetch(`${API_URL}/admin/update-stock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId, stock: newStock })
+            });
+            if (res.ok) fetchInventory();
         } catch (e) { }
     };
 
@@ -257,6 +280,27 @@ export default function App() {
                     >
                         {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitText}>POST TO MARKETPLACE</Text>}
                     </TouchableOpacity>
+                    <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.accent, marginTop: 20 }]} onPress={() => setShowInventory(!showInventory)}>
+                        <Text style={styles.submitText}>{showInventory ? "CLOSE INVENTORY" : "MANAGE MY INVENTORY"}</Text>
+                    </TouchableOpacity>
+
+                    {showInventory && (
+                        <View style={{ marginTop: 20 }}>
+                            <Text style={styles.formTitle}>MY INVENTORY</Text>
+                            {inventory.map(item => (
+                                <View key={item.id} style={styles.inventoryItem}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={{ fontWeight: 'bold' }}>{item.title}</Text>
+                                        <Text style={{ fontSize: 12, color: theme.secondary }}>Current Stock: {item.stock}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <TouchableOpacity onPress={() => updateStock(item.id, Math.max(0, item.stock - 1))} style={styles.stockBtn}><Ionicons name="remove" size={16} color="#fff" /></TouchableOpacity>
+                                        <TouchableOpacity onPress={() => updateStock(item.id, item.stock + 1)} style={[styles.stockBtn, { backgroundColor: theme.accent }]}><Ionicons name="add" size={16} color="#fff" /></TouchableOpacity>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -287,5 +331,7 @@ const styles = StyleSheet.create({
     loginContainer: { flex: 1, justifyContent: 'center', padding: 25, backgroundColor: '#f5f6fa' },
     loginCard: { backgroundColor: '#fff', padding: 30, borderRadius: 25 },
     loginTitle: { fontSize: 20, fontWeight: '900', textAlign: 'center', marginVertical: 15 },
-    serverText: { fontSize: 10, textAlign: 'center', color: '#666', marginBottom: 20 }
+    serverText: { fontSize: 10, textAlign: 'center', color: '#666', marginBottom: 20 },
+    inventoryItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f1f2f6', padding: 15, borderRadius: 15, marginBottom: 10 },
+    stockBtn: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#ff4757', justifyContent: 'center', alignItems: 'center', marginLeft: 8 }
 });
