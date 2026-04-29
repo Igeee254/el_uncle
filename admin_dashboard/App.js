@@ -196,9 +196,13 @@ export default function App() {
             if (data.filename) {
                 setProductForm(prev => ({ ...prev, image_uri: data.filename }));
                 setSelectedImage(uri);
-                Alert.alert("Image Ready", "Your image has been uploaded successfully!");
+                Alert.alert("Image Ready ✅", "Your image has been uploaded successfully! Now fill in the details and click POST.");
+            } else {
+                Alert.alert("Upload Failed ❌", data.error || "Image could not be uploaded to the server. Please try again.");
             }
-        } catch (e) { } finally { setSubmitting(false); }
+        } catch (e) {
+            Alert.alert("Network Error ❌", "Could not reach the server. Check your internet connection.");
+        } finally { setSubmitting(false); }
     };
 
     const handleAddProduct = async () => {

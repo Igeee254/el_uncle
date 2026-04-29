@@ -186,13 +186,14 @@ def upload_file():
         return jsonify({"error": "No selected file"}), 400
     if file:
         try:
-            # Upload to Cloudinary
+            print(f"🔵 Uploading file: {file.filename} to Cloudinary (cloud: {cloudinary.config().cloud_name})...")
             upload_result = cloudinary.uploader.upload(file, folder="kwelistorekenya_products")
-            # Return the secure URL
+            print(f"✅ Upload OK: {upload_result['secure_url']}")
             return jsonify({"filename": upload_result['secure_url']}), 200
         except Exception as e:
-            print(f"❌ Cloudinary Upload Error: {e}")
-            return jsonify({"error": str(e)}), 500
+            error_msg = str(e)
+            print(f"❌ Cloudinary Upload Error: {error_msg}")
+            return jsonify({"error": f"Image upload failed: {error_msg}"}), 500
     return jsonify({"error": "Unknown error"}), 500
 
 @app.route('/api/categories', methods=['GET'])
