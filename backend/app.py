@@ -618,11 +618,20 @@ def admin_login():
 
 @app.route('/api/admin/hard-reset-db-kweli', methods=['GET'])
 def hard_reset_db():
+    from models import Category
     try:
         db.drop_all()
         db.create_all()
-        return jsonify({"message": "DATABASE WIPED! All accounts are deleted. You can now sign up fresh."}), 200
+        
+        # Seed default categories
+        defaults = ["Electronics", "Fashion", "Home Decor", "Accessories", "Jewelry"]
+        for cat_name in defaults:
+            db.session.add(Category(name=cat_name))
+        db.session.commit()
+        
+        return jsonify({"message": "DATABASE WIPED & SEEDED! 5 Categories added. You can now sign up and post products."}), 200
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/admin/stats', methods=['GET'])
