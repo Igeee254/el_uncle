@@ -286,7 +286,7 @@ def admin_signup():
     if not email or not password or not full_name:
         return jsonify({"error": "Missing required fields"}), 400
 
-    if User.query.filter_by(email=email).first():
+    if User.query.filter_by(email=email, is_admin=True).first():
         return jsonify({"error": "Admin with this email already exists"}), 400
         
     token = str(uuid.uuid4())
@@ -325,7 +325,7 @@ def client_signup():
     if not email or not password or not full_name:
         return jsonify({"error": "Missing required fields"}), 400
 
-    if User.query.filter_by(email=email).first():
+    if User.query.filter_by(email=email, is_admin=False).first():
         return jsonify({"error": "User with this email already exists"}), 400
         
     token = str(uuid.uuid4())
