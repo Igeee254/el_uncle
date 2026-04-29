@@ -296,7 +296,7 @@ def admin_signup():
         email=email,
         password_hash=password, # Use hash in production
         is_admin=True,
-        is_verified=False,
+        is_verified=True,
         verification_token=token
     )
     
@@ -308,7 +308,7 @@ def admin_signup():
         if not email_sent:
             return jsonify({"message": "Signup successful, but failed to send email. Check server logs.", "token": token}), 201
             
-        return jsonify({"message": "Signup successful! Please check your email to verify your account.", "token": token}), 201
+        return jsonify({"message": "Signup successful! You can now log in directly.", "token": token}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -335,7 +335,7 @@ def client_signup():
         email=email,
         password_hash=password,
         is_admin=False,
-        is_verified=False,
+        is_verified=True,
         verification_token=token
     )
     
@@ -365,8 +365,7 @@ def client_login():
     try:
         user = User.query.filter_by(email=email).first()
         if user and user.password_hash == password:
-            if not user.is_verified and user.email != 'amstrongmutethia@gmail.com':
-                return jsonify({"error": "Please verify your email before logging in", "is_unverified": True}), 403
+        # Email verification disabled globally as per owner request
                 
             return jsonify({
                 "message": "Login successful",
@@ -596,8 +595,7 @@ def admin_login():
     try:
         user = User.query.filter_by(email=email, is_admin=True).first()
         if user and user.password_hash == password:
-            if not user.is_verified and user.email != 'amstrongmutethia@gmail.com':
-                return jsonify({"error": "Email not verified", "is_unverified": True}), 403
+            # Email verification disabled globally
                 
             return jsonify({
                 "message": "Login successful",
