@@ -438,13 +438,24 @@ def get_users():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/feedback', methods=['POST'])
+@app.route('/api/admin/check-verification/<email>', methods=['GET'])
 def check_verification(email):
     from models import User
-    user = User.query.filter_by(email=email).first()
-    if user and user.is_verified:
-        return jsonify({"verified": True, "user": {"id": user.id, "username": user.username, "full_name": user.full_name, "email": user.email}}), 200
-    return jsonify({"verified": False}), 200
+    try:
+        user = User.query.filter_by(email=email).first()
+        if user and user.is_verified:
+            return jsonify({
+                "verified": True, 
+                "user": {
+                    "id": user.id, 
+                    "username": user.username, 
+                    "full_name": user.full_name, 
+                    "email": user.email
+                }
+            }), 200
+        return jsonify({"verified": False}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/user/profile', methods=['PUT'])
 def update_profile():
