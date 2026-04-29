@@ -161,6 +161,7 @@ export default function App() {
             if (data.filename) {
                 setProductForm({ ...productForm, image_uri: data.filename });
                 setSelectedImage(uri);
+                Alert.alert("Image Ready", "Your image has been uploaded successfully!");
             }
         } catch (e) { } finally { setSubmitting(false); }
     };
@@ -183,8 +184,12 @@ export default function App() {
             });
             const data = await res.json();
             if (res.ok) {
-                Alert.alert("Success", "Product Added!");
-                setProductForm({ ...productForm, title: '', price: '', provider_contact: '', category_id: '' });
+                Alert.alert("Success", "Product successfully posted to KweliStore!");
+                setProductForm({
+                    title: '', price: '', category_id: '',
+                    image_uri: 'bracelet.png', // Reset to default
+                    provider_contact: '', uploader_id: adminUser?.id
+                });
                 setSelectedImage(null);
                 fetchData();
             } else {
@@ -245,7 +250,11 @@ export default function App() {
                         ))}
                     </ScrollView>
 
-                    <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.accent }]} onPress={handleAddProduct}>
+                    <TouchableOpacity
+                        style={[styles.submitBtn, { backgroundColor: theme.accent }, submitting && { opacity: 0.5 }]}
+                        onPress={handleAddProduct}
+                        disabled={submitting}
+                    >
                         {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitText}>POST TO MARKETPLACE</Text>}
                     </TouchableOpacity>
                 </View>
