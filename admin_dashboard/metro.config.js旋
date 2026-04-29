@@ -1,0 +1,18 @@
+const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
+
+const projectRoot = __dirname;
+const config = getDefaultConfig(projectRoot);
+
+// Ensure Metro only looks inside this folder for App.js/index.js
+config.projectRoot = projectRoot;
+config.watchFolders = [projectRoot];
+
+// Force Metro to ignore the parent directory
+config.resolver.blockList = [
+    /node_modules\/.*\/node_modules/, // Ignore nested node_modules
+    /..\/App\.js/,                   // Specifically ignore the parent App.js
+    /..\/components\/.*/             // Ignore parent components
+];
+
+module.exports = config;
