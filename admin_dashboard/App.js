@@ -121,7 +121,7 @@ export default function App() {
         } catch (e) { } finally { setLoading(false); }
     };
 
-    const fetchData = async () => {
+    const fetchData = async (userId) => {
         try {
             const [statsRes, catRes] = await Promise.all([
                 fetch(`${API_URL}/admin/stats`),
@@ -129,7 +129,7 @@ export default function App() {
             ]);
             setStats(await statsRes.json());
             setCategories(await catRes.json());
-            fetchInventory();
+            fetchInventory(userId);
         } catch (e) { }
     };
 
@@ -294,13 +294,14 @@ export default function App() {
                             <Text style={styles.formTitle}>MY INVENTORY</Text>
                             {inventory.map(item => (
                                 <View key={item.id} style={styles.inventoryItem}>
+                                    <Image source={{ uri: item.image_uri }} style={{ width: 40, height: 40, borderRadius: 8, marginRight: 10 }} />
                                     <View style={{ flex: 1 }}>
-                                        <Text style={{ fontWeight: 'bold' }}>{item.title}</Text>
-                                        <Text style={{ fontSize: 12, color: theme.secondary }}>Current Stock: {item.stock}</Text>
+                                        <Text style={{ fontSize: 13, fontWeight: 'bold' }}>{item.title}</Text>
+                                        <Text style={{ fontSize: 11, color: theme.secondary }}>KSh {item.price} • Stock: {item.stock}</Text>
                                     </View>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                        <TouchableOpacity onPress={() => updateStock(item.id, Math.max(0, item.stock - 1))} style={styles.stockBtn}><Ionicons name="remove" size={16} color="#fff" /></TouchableOpacity>
-                                        <TouchableOpacity onPress={() => updateStock(item.id, item.stock + 1)} style={[styles.stockBtn, { backgroundColor: theme.accent }]}><Ionicons name="add" size={16} color="#fff" /></TouchableOpacity>
+                                        <TouchableOpacity onPress={() => updateStock(item.id, Math.max(0, item.stock - 1))} style={styles.stockBtn}><Ionicons name="remove" size={14} color="#fff" /></TouchableOpacity>
+                                        <TouchableOpacity onPress={() => updateStock(item.id, item.stock + 1)} style={[styles.stockBtn, { backgroundColor: theme.accent }]}><Ionicons name="add" size={14} color="#fff" /></TouchableOpacity>
                                     </View>
                                 </View>
                             ))}
