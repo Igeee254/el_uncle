@@ -133,10 +133,11 @@ export default function App() {
         } catch (e) { }
     };
 
-    const fetchInventory = async () => {
-        if (!adminUser?.id) return;
+    const fetchInventory = async (userId) => {
+        const idToUse = userId || adminUser?.id;
+        if (!idToUse) return;
         try {
-            const res = await fetch(`${API_URL}/admin/my-products?uploader_id=${adminUser.id}`);
+            const res = await fetch(`${API_URL}/admin/my-products?uploader_id=${idToUse}`);
             const data = await res.json();
             setInventory(data);
         } catch (e) { }
@@ -157,7 +158,7 @@ export default function App() {
         setAdminUser(user);
         setProductForm(prev => ({ ...prev, uploader_id: user?.id }));
         setIsAuthenticated(true);
-        fetchData();
+        fetchData(user.id);
     };
 
     const handleLogout = async () => {
@@ -182,7 +183,7 @@ export default function App() {
             const res = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData, headers: { 'Content-Type': 'multipart/form-data' } });
             const data = await res.json();
             if (data.filename) {
-                setProductForm({ ...productForm, image_uri: data.filename });
+                setProductForm(prev => ({ ...prev, image_uri: data.filename }));
                 setSelectedImage(uri);
                 Alert.alert("Image Ready", "Your image has been uploaded successfully!");
             }
@@ -196,6 +197,10 @@ export default function App() {
         }
         if (!productForm.category_id) {
             Alert.alert("Error", "Please select a category");
+            return;
+        }
+        if (productForm.image_uri === 'bracelet.png') {
+            Alert.alert("Caution", "You haven't uploaded an image yet! Please pick a photo first.");
             return;
         }
         setSubmitting(true);
