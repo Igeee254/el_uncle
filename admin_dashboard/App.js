@@ -52,13 +52,13 @@ function LoginScreen({ onLoginSuccess }) {
             if (response.ok) {
                 if (isLogin) {
                     await AsyncStorage.setItem('@admin_token', data.token);
-                    onLoginSuccess(data.admin);
+                    console.log('LOGIN SUCCESS! Moving to Dashboard...'); onLoginSuccess(data.admin);
                 } else {
                     Alert.alert("Success", data.message);
                     setIsLogin(true); // Switch back to login
                 }
             } else { Alert.alert("Failed", data.error || data.message || "Authentication failed"); }
-        } catch (e) { Alert.alert("Error", "Check Connection"); }
+        } catch (e) { console.error('LOGIN ERROR:', e); Alert.alert('Error', 'Check Connection: ' + e.message); }
         finally { setLoading(false); }
     };
 
