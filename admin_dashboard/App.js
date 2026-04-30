@@ -111,6 +111,9 @@ export default function App() {
     const [selectedImage, setSelectedImage] = useState(null);
     const [inventory, setInventory] = useState([]);
     const [showInventory, setShowInventory] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [showUsers, setShowUsers] = useState(false);
+    const [loadingUsers, setLoadingUsers] = useState(false);
 
     const [productForm, setProductForm] = useState({
         title: '', price: '', category_id: '', image_uri: 'bracelet.png',
@@ -148,6 +151,18 @@ export default function App() {
             const data = await res.json();
             setInventory(Array.isArray(data) ? data : []);
         } catch (e) { }
+    };
+
+    const fetchUsers = async () => {
+        if (!adminUser?.email) return;
+        setLoadingUsers(true);
+        try {
+            const res = await fetch(`${API_URL}/admin/users?email=${adminUser.email}`);
+            const data = await res.json();
+            setUsers(Array.isArray(data) ? data : []);
+        } catch (e) {
+            showAlert('Error', 'Could not load users.');
+        } finally { setLoadingUsers(false); }
     };
 
     const deleteProduct = async (productId) => {
@@ -343,6 +358,38 @@ export default function App() {
                                             <TouchableOpacity onPress={() => updateStock(item.id, item.stock + 1)} style={[styles.stockBtn, { backgroundColor: theme.accent }]}><Ionicons name="add" size={14} color="#fff" /></TouchableOpacity>
                                             <TouchableOpacity onPress={() => deleteProduct(item.id)} style={[styles.stockBtn, { backgroundColor: '#ff4757', marginLeft: 15 }]}><Ionicons name="trash" size={14} color="#fff" /></TouchableOpacity>
                                         </View>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+                    )}
+                    <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.primaryGreen, marginTop: 12 }]} onPress={() => { setShowUsers(!showUsers); if (!showUsers) fetchUsers(); }}>
+                        <Text style={styles.submitText}>{showUsers ? 'CLOSE USERS' : '👥 VIEW ALL USERS'}</Text>
+                    </TouchableOpacity>
+
+                    {showUsers && (
+                        <View style={{ marginTop: 20 }}>
+                            <Text style={styles.formTitle}>REGISTERED USERS</Text>
+                            {loadingUsers ? (
+                                <ActivityIndicator color={theme.accent} />
+                            ) : users.length === 0 ? (
+                                <Text style={{ textAlign: 'center', color: '#666', marginTop: 10 }}>No users found.</Text>
+                            ) : (
+                                users.map(u => (
+                                    <View key={u.id} style={[styles.inventoryItem, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 4 }}>
+                                            <Text style={{ fontSize: 13, fontWeight: 'bold', flex: 1 }}>{u.full_name || u.username}</Text>
+                                            <View style={{ flexDirection: 'row', gap: 6 }}>
+                                                <View style={{ backgroundColor: u.is_admin ? theme.accent : theme.primaryGreen, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 }}>
+                                                    <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>{u.is_admin ? 'ADMIN' : 'CLIENT'}</Text>
+                                                </View>
+                                                <View style={{ backgroundColor: u.is_verified ? '#00b894' : '#d63031', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 }}>
+                                                    <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>{u.is_verified ? 'VERIFIED' : 'UNVERIFIED'}</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <Text style={{ fontSize: 11, color: theme.secondary }}>@{u.username}</Text>
+                                        <Text style={{ fontSize: 11, color: theme.secondary }}>{u.email}</Text>
                                     </View>
                                 ))
                             )}
