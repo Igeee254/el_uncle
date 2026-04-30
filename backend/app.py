@@ -701,6 +701,76 @@ def get_admin_stats():
         "newOrders": new_orders
     })
 
+# ==========================================
+# M-PESA DARAJA API ENDPOINTS
+# ==========================================
+import requests, base64, datetime
+
+MPESA_CONSUMER_KEY = "KSJuKaX5MO3Vmb3dsT8MsnDlryfGtmyfMgkSWJjH9c0rgtj5"
+MPESA_CONSUMER_SECRET = "cnVWAbtJcppA857nAtEAaVmWHFmgaSFe3jB80Gz8suilKDbziSm0ffzETy6ZRFoH"
+MPESA_SHORTCODE = "174379"
+MPESA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+MPESA_ENV = "sandbox"
+
+def get_mpesa_access_token():
+    auth_url = f"https://{MPESA_ENV}.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    r = requests.get(auth_url, auth=(MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET))
+    if r.ok:
+        return r.json().get("access_token")
+    return None
+
+@app.route('/api/mpesa/stkpush', methods=['POST'])
+def mpesa_stk_push():
+    data = request.json
+    phone = data.get('phone')
+    amount = data.get('amount')
+    
+    if not phone or not amount:
+        return jsonify({"error": "Phone number and amount are required"}), 400
+        
+    # Format phone number: expected 2547...
+    if phone.startswith('0'):
+        phone = '254' + phone[1:]
+    elif phone.startswith('+'):
+        phone = phone[1:]
+        
+    access_token = get_mpesa_access_token()
+    if not access_token:
+        return jsonify({"error": "Failed to authenticate with Safaricom"}), 500
+        
+    stk_url = f"https://{MPESA_ENV}.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    password_str = f"{MPESA_SHORTCODE}{MPESA_PASSKEY}{timestamp}"
+    password = base64.b64encode(password_str.encode('utf-8')).decode('utf-8')
+    
+    payload = {
+        "BusinessShortCode": MPESA_SHORTCODE,
+        "Password": password,
+        "Timestamp": timestamp,
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": int(amount),
+        "PartyA": phone,
+        "PartyB": MPESA_SHORTCODE,
+        "PhoneNumber": phone,
+        "CallBackURL": "https://el-uncle.onrender.com/api/mpesa/callback",
+        "AccountReference": "KweliStore",
+        "TransactionDesc": "Checkout Payment"
+    }
+    
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    
+    response = requests.post(stk_url, json=payload, headers=headers)
+    return jsonify(response.json()), response.status_code
+
+@app.route('/api/mpesa/callback', methods=['POST'])
+def mpesa_callback():
+    callback_data = request.json
+    print("M-PESA CALLBACK RECEIVED:", callback_data)
+    return jsonify({"ResultCode": 0, "ResultDesc": "Success"})
+
 if __name__ == '__main__':
     with app.app_context():
         from models import Category, Product, Order, OrderItem, User 

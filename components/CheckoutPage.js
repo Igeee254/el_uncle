@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 const STEPS = ['Address', 'Payment', 'Confirm'];
 
 const PAYMENT_METHODS = [
+    { id: 'mpesa', label: 'M-Pesa STK Push', icon: 'phone-portrait-outline', desc: 'Secure prompt via Daraja API' },
     { id: 'direct', label: 'Direct Payment', icon: 'people-outline', desc: 'Pay directly to the provider' },
     { id: 'cash', label: 'Cash on Delivery', icon: 'cash-outline', desc: 'Pay when item arrives' },
 ];
@@ -19,6 +20,9 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
     const [mpesaPhone, setMpesaPhone] = useState('');
     const [ordered, setOrdered] = useState(false);
     const [inquiryVerified, setInquiryVerified] = useState(false);
+    const [isTriggeringPayment, setIsTriggeringPayment] = useState(false);
+
+    const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle.onrender.com/api';
 
     const total = cart.reduce((sum, item) => {
         const num = parseInt(String(item.price).replace('KSh ', '').replace(',', '')) || 0;
@@ -33,12 +37,43 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
         return true;
     };
 
-    const handlePlaceOrder = () => {
-        setOrdered(true);
-        setTimeout(() => {
-            onClear();
-            onNavigate('Home');
-        }, 3500);
+    const handlePlaceOrder = async () => {
+        if (payMethod === 'mpesa') {
+            const phone = address.phone || mpesaPhone;
+            if (!phone) {
+                Alert.alert("Missing Phone", "Please provide a phone number for M-Pesa.");
+                return;
+            }
+            setIsTriggeringPayment(true);
+            try {
+                const res = await fetch(`${API_URL}/mpesa/stkpush`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, amount: total })
+                });
+                const data = await res.json();
+                if (res.ok && data.ResponseCode === "0") {
+                    Alert.alert("STK Push Sent!", "Please check your phone and enter your M-Pesa PIN.");
+                    setOrdered(true);
+                    setTimeout(() => {
+                        onClear();
+                        onNavigate('Home');
+                    }, 5000);
+                } else {
+                    Alert.alert("Failed", data.errorMessage || data.error || "Could not trigger STK Push.");
+                }
+            } catch (e) {
+                Alert.alert("Network Error", "Could not connect to payment server.");
+            } finally {
+                setIsTriggeringPayment(false);
+            }
+        } else {
+            setOrdered(true);
+            setTimeout(() => {
+                onClear();
+                onNavigate('Home');
+            }, 3500);
+        }
     };
 
     // ── STEP INDICATOR ──────────────────────────────────────────────
@@ -229,9 +264,9 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                             Alert.alert("Contact Required", "Please contact the seller first and check the verification box to proceed.");
                         }
                     }}
-                    disabled={!inquiryVerified}
+                    disabled={!inquiryVerified || isTriggeringPayment}
                 >
-                    <Text style={styles.nextBtnText}>PLACE ORDER 🎉</Text>
+                    <Text style={styles.nextBtnText}>{isTriggeringPayment ? "SENDING PROMPT..." : "PLACE ORDER 🎉"}</Text>
                 </TouchableOpacity>
             </View>
         </View>
