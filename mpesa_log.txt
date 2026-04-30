@@ -1,0 +1,2 @@
+Response Status Code: 200
+Response Body: {'MerchantRequestID': '4038-4fda-9c69-9b31e58c593322128', 'CheckoutRequestID': 'ws_CO_30042026144915187746860965', 'ResponseCode': '0', 'ResponseDescription': 'Success. Request accepted for processing', 'CustomerMessage': 'Success. Request accepted for processing'}
