@@ -155,8 +155,12 @@ def status():
 @app.route('/api/products', methods=['GET'])
 def get_products():
     try:
-        from models import Product
-        products = Product.query.all()
+        from models import Product, Category, User
+        from sqlalchemy.orm import joinedload
+        products = Product.query.options(
+            joinedload(Product.category_rel),
+            joinedload(Product.uploader)
+        ).all()
         result = []
         for p in products:
             result.append({
@@ -175,7 +179,7 @@ def get_products():
         return jsonify(result)
     except Exception as e:
         print(f"Error fetching products: {e}")
-        return jsonify({"error": "Database offline", "hint": "Start MySQL in XAMPP"}), 503
+        return jsonify({"error": str(e)}), 503
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():

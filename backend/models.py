@@ -63,6 +63,8 @@ class Product(db.Model):
     reviews_count = db.Column(db.Integer, default=0)
     provider_contact = db.Column(db.String(20), nullable=True) # WhatsApp or Phone
 
+    uploader = db.relationship('User', foreign_keys=[uploader_id], lazy='select')
+
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
