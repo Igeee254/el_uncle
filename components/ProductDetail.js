@@ -195,7 +195,19 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                         <View style={styles.actionRow}>
                             <TouchableOpacity
                                 style={[styles.buyButton, { backgroundColor: theme.accent, flex: 2 }]}
-                                onPress={() => onBuy({ ...product, price: currentPrice, variety: selectedVariety.label, color: selectedColor.name, quantity }, true)}
+                                onPress={() => {
+                                    const contact = product.provider_contact || '254700000000';
+                                    const cleanContact = contact.replace(/\D/g, '');
+                                    const message = encodeURIComponent(
+                                        `Hi! I'm interested in buying *${product.title}*.\n\n` +
+                                        `• Variety: ${selectedVariety.label}\n` +
+                                        `• Color: ${selectedColor.name}\n` +
+                                        `• Quantity: ${quantity}\n` +
+                                        `• Price: ${currentPrice}\n\n` +
+                                        `Is it available?`
+                                    );
+                                    Linking.openURL(`https://wa.me/${cleanContact}?text=${message}`);
+                                }}
                             >
                                 <Text style={styles.buyButtonText}>INQUIRE TO BUY</Text>
                             </TouchableOpacity>
