@@ -39,11 +39,15 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
 
     const handlePlaceOrder = async () => {
         if (payMethod === 'mpesa') {
-            const phone = address.phone || mpesaPhone;
+            let phone = mpesaPhone || address.phone;
             if (!phone) {
-                Alert.alert("Missing Phone", "Please provide a phone number for M-Pesa.");
+                Alert.alert("Missing Phone", "Please provide an M-Pesa phone number.");
                 return;
             }
+            // Basic formatting to 254...
+            phone = phone.replace(/\s+/g, '').replace(/\+/g, '');
+            if (phone.startsWith('0')) phone = '254' + phone.substring(1);
+
             setIsTriggeringPayment(true);
             try {
                 const res = await fetch(`${API_URL}/mpesa/stkpush`, {
@@ -55,15 +59,12 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                 if (res.ok && data.ResponseCode === "0") {
                     Alert.alert("STK Push Sent!", "Please check your phone and enter your M-Pesa PIN.");
                     setOrdered(true);
-                    setTimeout(() => {
-                        onClear();
-                        onNavigate('Home');
-                    }, 5000);
+                    // Don't auto-redirect, let them click "Back to Home" or "Leave Feedback"
                 } else {
                     Alert.alert("Failed", data.errorMessage || data.error || "Could not trigger STK Push.");
                 }
             } catch (e) {
-                Alert.alert("Network Error", "Could not connect to payment server.");
+                Alert.alert("Network Error", "Could not connect to payment server. Did you deploy the backend?");
             } finally {
                 setIsTriggeringPayment(false);
             }
@@ -156,30 +157,36 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
                 </TouchableOpacity>
             ))}
 
-            {payMethod === 'direct' && (
+            {(payMethod === 'direct' || payMethod === 'mpesa') && (
                 <View style={[styles.mpesaBox, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>Direct Provider Transaction</Text>
+                    <Text style={[styles.label, { color: theme.text }]}>
+                        {payMethod === 'mpesa' ? "M-Pesa STK Push" : "Direct Provider Transaction"}
+                    </Text>
                     <Text style={[styles.mpesaDetail, { color: theme.accent, fontSize: 13, fontWeight: '700' }]}>
-                        You will handle the payment directly with the provider(s) of the items.
+                        {payMethod === 'mpesa'
+                            ? "An STK prompt will be sent to the number below to enter your PIN."
+                            : "You will handle the payment directly with the provider(s) of the items."}
                     </Text>
 
-                    <View style={{ marginTop: 15, padding: 10, backgroundColor: theme.background, borderRadius: 8 }}>
-                        <Text style={[styles.label, { color: theme.secondaryText, fontSize: 11 }]}>PROVIDER CONTACT(S)</Text>
-                        {[...new Set(cart.map(item => item.provider_contact))].map((contact, idx) => (
-                            <TouchableOpacity key={idx} onPress={() => Linking.openURL(`tel:${contact}`)}>
-                                <Text style={[styles.mpesaDetail, { color: theme.accent, fontSize: 15 }]}>
-                                    📞 {contact || 'Contact details during upload'}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
+                    {payMethod === 'direct' && (
+                        <View style={{ marginTop: 15, padding: 10, backgroundColor: theme.background, borderRadius: 8 }}>
+                            <Text style={[styles.label, { color: theme.secondaryText, fontSize: 11 }]}>PROVIDER CONTACT(S)</Text>
+                            {[...new Set(cart.map(item => item.provider_contact))].map((contact, idx) => (
+                                <TouchableOpacity key={idx} onPress={() => Linking.openURL(`tel:${contact}`)}>
+                                    <Text style={[styles.mpesaDetail, { color: theme.accent, fontSize: 15 }]}>
+                                        📞 {contact || 'Contact details during upload'}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
 
-                    <Text style={[styles.label, { color: theme.text, marginTop: 15 }]}>Your M-Pesa Number (For reference)</Text>
+                    <Text style={[styles.label, { color: theme.text, marginTop: 15 }]}>M-Pesa Number</Text>
                     <TextInput
                         style={[styles.input, { borderColor: theme.border, color: theme.text, backgroundColor: theme.background }]}
                         value={mpesaPhone}
                         onChangeText={setMpesaPhone}
-                        placeholder="e.g. 0712 345 678"
+                        placeholder={address.phone || "e.g. 0712 345 678"}
                         placeholderTextColor={theme.secondaryText}
                         keyboardType="phone-pad"
                     />
@@ -275,10 +282,33 @@ const CheckoutPage = ({ cart, theme, onNavigate, onClear }) => {
     // ── SUCCESS SCREEN ───────────────────────────────────────────────
     if (ordered) {
         return (
-            <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
+            <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
                 <Ionicons name="checkmark-circle" size={100} color="#4caf50" />
-                <Text style={[styles.successTitle, { color: theme.text }]}>Order Placed!</Text>
-                <Text style={[styles.successSub, { color: theme.secondaryText }]}>Thank you for your purchase 🎁{'\n'}We'll be in touch soon via WhatsApp.</Text>
+                <Text style={[styles.successTitle, { color: theme.text, textAlign: 'center' }]}>
+                    {payMethod === 'mpesa' ? "Payment Initiated!" : "Order Placed!"}
+                </Text>
+                <Text style={[styles.successSub, { color: theme.secondaryText }]}>
+                    {payMethod === 'mpesa'
+                        ? "We have sent an STK push to your phone. Please enter your PIN to complete the transaction."
+                        : "Thank you for your purchase 🎁\nWe'll be in touch soon via WhatsApp."}
+                </Text>
+
+                <View style={{ marginTop: 40, width: '100%' }}>
+                    <TouchableOpacity
+                        style={[styles.nextBtn, { backgroundColor: theme.accent, width: '100%', marginBottom: 15 }]}
+                        onPress={() => { onClear(); onNavigate('Home'); }}
+                    >
+                        <Text style={styles.nextBtnText}>BACK TO MARKETPLACE</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.nextBtn, { backgroundColor: 'transparent', borderWidth: 2, borderColor: theme.accent, width: '100%' }]}
+                        onPress={() => { onClear(); onNavigate('Profile'); }}
+                    >
+                        <Text style={[styles.nextBtnText, { color: theme.accent }]}>RATE OUR SERVICE</Text>
+                        <Ionicons name="star" size={16} color={theme.accent} style={{ marginLeft: 8 }} />
+                    </TouchableOpacity>
+                </View>
             </SafeAreaView>
         );
     }
