@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image,
 import { Ionicons } from '@expo/vector-icons';
 
 const APP_VERSION = 'v1.2.0';
-const SUPPORT_WHATSAPP = '+254 746 860 965';
+const SUPPORT_WHATSAPP = '254746860965';
 
 const ProfileSettings = ({ onNavigate, onLogout, theme, isDark, userProfile, setUserProfile, activityHistory, onProductSelect }) => {
     const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://el-uncle.onrender.com/api';
