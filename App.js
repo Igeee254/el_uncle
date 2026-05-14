@@ -507,6 +507,7 @@ export default function App() {
           <CartPage
             cart={cart}
             theme={theme}
+            isDark={isDark}
             onNavigate={navigateTo}
             onRemove={removeFromCart}
             onClear={clearCart}
@@ -552,36 +553,36 @@ export default function App() {
 
         return (
           <View style={[styles.shopContainer, styles.safeContainer, { backgroundColor: theme.background }]}>
-            <View style={[styles.shopHeader, { borderBottomColor: theme.border }]}>
+            <View style={[styles.shopHeader, { backgroundColor: isDark ? '#1a1a1a' : '#fff', borderBottomColor: isDark ? '#333' : '#eee' }]}>
               <TouchableOpacity style={styles.backButton} onPress={goBack}>
-                <Ionicons name="arrow-back" size={24} color={theme.accent} />
+                <Ionicons name="arrow-back" size={24} color={theme.text} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigateTo('Home')}>
-                <Text style={[styles.shopHeaderTitle, { color: theme.text }]}>KweliStoreKenya CATALOG</Text>
-              </TouchableOpacity>
+              <Text style={[styles.shopHeaderTitle, { color: theme.text }]}>MARKETPLACE</Text>
               <View style={styles.headerRight}>
                 <TouchableOpacity onPress={fetchProducts} style={{ padding: 8, marginRight: 4 }}>
-                  <Ionicons name="refresh" size={20} color={theme.accent} />
+                  <Ionicons name="refresh" size={22} color={theme.primaryGreen} />
                 </TouchableOpacity>
                 <HeaderActions />
               </View>
             </View>
 
-            {/* Search Bar */}
-            <View style={[styles.searchBar, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
-              <Ionicons name="search" size={18} color={theme.secondaryText} style={{ marginRight: 8 }} />
-              <TextInput
-                style={[styles.searchInput, { color: theme.text }]}
-                placeholder="Search products..."
-                placeholderTextColor={theme.secondaryText}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={18} color={theme.secondaryText} />
-                </TouchableOpacity>
-              )}
+            {/* Premium Search Bar */}
+            <View style={[styles.shopSearchSection, { backgroundColor: theme.background }]}>
+              <View style={[styles.searchBar, { backgroundColor: isDark ? '#222' : '#fff', borderColor: theme.border, borderWidth: 1, borderRadius: 8 }]}>
+                <Ionicons name="search" size={20} color={theme.secondaryText} style={{ marginRight: 10 }} />
+                <TextInput
+                  style={[styles.searchInput, { color: theme.text, fontSize: 14 }]}
+                  placeholder="Search premium products..."
+                  placeholderTextColor={theme.secondaryText}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearchQuery('')}>
+                    <Ionicons name="close-circle" size={20} color={theme.secondaryText} />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
 
             <View style={[
@@ -878,5 +879,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 8,
     fontWeight: '900',
+  },
+  shopSearchSection: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    marginBottom: 10,
   }
 });

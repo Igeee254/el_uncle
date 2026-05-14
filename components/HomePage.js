@@ -7,90 +7,132 @@ import ProductCard from './ProductCard';
 const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, onBuy, onProductSelect, allProducts, categories, onScroll, wishlist, preferredCategories }) => {
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
-    const numColumns = isMobile ? 2 : 3;
 
-    // Recommendation Logic
+    // Recommendation Logic (Flash Sales)
     const getRecommendations = () => {
         if (!allProducts || allProducts.length === 0) return [];
-        const hasInterests = preferredCategories && preferredCategories.length > 0;
-        if (!hasInterests) return [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 6);
-        const interests = preferredCategories;
-        const recommended = allProducts.filter(item => interests.includes(item.category) && !wishlist.find(w => w.id === item.id));
-        if (recommended.length < 4) {
-            const others = allProducts.filter(item => !interests.includes(item.category) && !wishlist.find(w => w.id === item.id)).sort(() => 0.5 - Math.random());
-            return [...recommended, ...others].slice(0, 8);
-        }
-        return recommended.slice(0, 8);
+        return [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 6);
     };
 
     const recommendations = getRecommendations();
-
     const currentCategories = categories && categories.length > 1 ? categories : ['All', 'Fashion', 'Electronics', 'Home & Office', 'Health & Beauty'];
 
+    // Category Icons mapping
+    const getCatIcon = (cat) => {
+        switch (cat.toLowerCase()) {
+            case 'fashion': return 'shirt-outline';
+            case 'electronics': return 'phone-portrait-outline';
+            case 'home & office': return 'business-outline';
+            case 'health & beauty': return 'heart-half-outline';
+            default: return 'apps-outline';
+        }
+    }
+
     return (
-        <ScrollView
-            style={[styles.container, { backgroundColor: theme.background }]}
-            showsVerticalScrollIndicator={false}
-            onScroll={onScroll}
-            scrollEventThrottle={16}
-        >
-            {/* Navbar Minimal */}
-            <View style={styles.navBar}>
-                <TouchableOpacity onPress={() => onNavigate('Home')}>
-                    <Text style={[styles.logo, { color: theme.text }]}>KweliStoreKenya</Text>
-                </TouchableOpacity>
-                <View style={styles.navBarRight}>
-                    {!isMobile && (
-                        <View style={styles.navLinks}>
-                            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>CATALOG</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => onNavigate('Shop')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>OFFERS</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => onNavigate('Home')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>HELP CENTER</Text></TouchableOpacity>
-                            <TouchableOpacity onPress={() => onNavigate('Feedback')}><Text style={[styles.navLink, { color: theme.secondaryText }]}>FEEDBACK</Text></TouchableOpacity>
-                        </View>
-                    )}
-                    <View style={styles.headerActionsWrapper}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            {/* 1. KILIMALL SEARCH HEADER */}
+            <View style={[styles.kiliHeader, { backgroundColor: isDark ? '#1a1a1a' : '#fff' }]}>
+                <View style={styles.headerTop}>
+                    <TouchableOpacity onPress={() => onNavigate('Home')}>
+                        <Text style={[styles.logo, { color: theme.primaryGreen }]}>Kweli<Text style={{ color: theme.accent }}>Store</Text></Text>
+                    </TouchableOpacity>
+                    <View style={styles.headerTopRight}>
                         {headerActions}
                     </View>
                 </View>
+                <View style={styles.searchRow}>
+                    <View style={[styles.searchBox, { borderColor: theme.border }]}>
+                        <Ionicons name="search" size={20} color="#999" />
+                        <Text style={styles.searchPlaceholder}>Search for products...</Text>
+                    </View>
+                    <TouchableOpacity style={[styles.searchBtn, { backgroundColor: theme.primaryGreen }]}>
+                        <Text style={styles.searchBtnText}>Search</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
-            {/* 1. HERO BANNER (General Marketplace Expansion) */}
-            <View style={[styles.heroBanner, { height: isMobile ? 350 : 500 }]}>
-                <ImageBackground
-                    source={require('../assets/hero.png')}
-                    style={styles.heroImg}
-                    imageStyle={{ opacity: 0.9 }}
-                >
-                    <View style={styles.heroTextOverlay}>
-                        <Text style={styles.heroSubtitle}>Everything You Need, Delivered</Text>
-                        <Text style={styles.heroTitle}>SHOP THE NEW{"\n"}MARKETPLACE</Text>
-                        <TouchableOpacity style={[styles.shopNowBtn, { backgroundColor: theme.accent }]} onPress={() => onNavigate('Shop')}>
-                            <Text style={styles.shopNowText}>Start Shopping</Text>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+            >
+                {/* 2. HERO BANNER */}
+                <View style={styles.heroWrapper}>
+                    <ImageBackground
+                        source={require('../assets/hero.png')}
+                        style={[styles.heroImg, { height: isMobile ? 180 : 350 }]}
+                        imageStyle={{ borderRadius: 8 }}
+                    >
+                        <View style={styles.heroOverlay}>
+                            <Text style={styles.heroBadge}>MEGA DEALS</Text>
+                            <Text style={styles.heroMainTitle}>UP TO 50% OFF</Text>
+                            <Text style={styles.heroSubTitle}>Shop Premium Essentials</Text>
+                        </View>
+                    </ImageBackground>
+                </View>
+
+                {/* 3. CATEGORY BUBBLES */}
+                <View style={[styles.catSection, { backgroundColor: isDark ? '#1a1a1a' : '#fff' }]}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScroll}>
+                        {currentCategories.map(cat => (
+                            <TouchableOpacity
+                                key={cat}
+                                style={styles.catBubbleItem}
+                                onPress={() => onCategorySelect(cat)}
+                            >
+                                <View style={[styles.catCircle, { backgroundColor: isDark ? '#222' : '#F9F9F9' }]}>
+                                    <Ionicons name={getCatIcon(cat)} size={24} color={theme.primaryGreen} />
+                                </View>
+                                <Text style={[styles.catBubbleLabel, { color: theme.text }]} numberOfLines={1}>{cat}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
+
+                {/* 4. FLASH SALE */}
+                <View style={styles.flashSaleSection}>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.flashSaleLabelRow}>
+                            <Text style={styles.flashSaleTitle}>FLASH SALE</Text>
+                            <View style={styles.timerContainer}>
+                                <Text style={styles.timerBox}>12</Text>
+                                <Text style={styles.timerSep}>:</Text>
+                                <Text style={styles.timerBox}>45</Text>
+                                <Text style={styles.timerSep}>:</Text>
+                                <Text style={styles.timerBox}>09</Text>
+                            </View>
+                        </View>
+                        <TouchableOpacity onPress={() => onCategorySelect('All')}>
+                            <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 13 }}>View All {'>'}</Text>
                         </TouchableOpacity>
                     </View>
-                </ImageBackground>
-            </View>
-
-            {/* 2. TRENDING SECTION */}
-            {recommendations.length > 0 && (
-                <View style={[styles.section, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }]}>
-                    <View style={styles.sectionHeader}>
-                        <View>
-                            <Text style={[styles.sectionTitle, { color: theme.text, marginBottom: 4 }]}>
-                                {preferredCategories && preferredCategories.length > 0 ? "Personalized For You" : "Trending Deals"}
-                            </Text>
-                            <Text style={[styles.sectionSubtitle, { color: theme.secondaryText, paddingHorizontal: 20, fontSize: 13, marginBottom: 15 }]}>
-                                {preferredCategories && preferredCategories.length > 0 ? "Based on items you've liked" : "Our top picks from across the store"}
-                            </Text>
-                        </View>
-                    </View>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={[styles.horizontalScroll, { paddingVertical: 10 }]}
-                    >
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.flashScroll}>
                         {recommendations.map(item => (
-                            <View key={item.id} style={{ width: 220, marginRight: 15 }}>
+                            <View key={item.id} style={styles.flashCard}>
+                                <ProductCard
+                                    item={item}
+                                    theme={theme}
+                                    isDark={isDark}
+                                    onBuy={onBuy}
+                                    onProductPress={onProductSelect}
+                                    variant="ecommerce"
+                                />
+                                <View style={styles.saleBadge}>
+                                    <Text style={styles.saleBadgeText}>-20%</Text>
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
+                </View>
+
+                {/* 5. MAIN PRODUCT GRID */}
+                <View style={styles.mainGridSection}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.mainGridTitle}>RECOMMENDED FOR YOU</Text>
+                    </View>
+                    <View style={styles.productGrid}>
+                        {allProducts.map(item => (
+                            <View key={item.id} style={{ width: isMobile ? '50%' : '25%' }}>
                                 <ProductCard
                                     item={item}
                                     theme={theme}
@@ -101,69 +143,31 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
                                 />
                             </View>
                         ))}
-                    </ScrollView>
-                </View>
-            )}
-
-            {/* 3. BROWSE BY CATEGORY SECTION */}
-            <View style={[styles.section, { paddingTop: 0 }]}>
-                <Text style={[styles.justForYouTitle, { color: theme.text }]}>Discover Departments</Text>
-
-                {/* Category Filter Chips */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                    {currentCategories.map(cat => (
-                        <TouchableOpacity
-                            key={cat}
-                            style={[styles.chip, { borderColor: theme.border }]}
-                            onPress={() => onCategorySelect(cat)}
-                        >
-                            <Text style={[styles.chipText, { color: theme.secondaryText }]}>{cat.toUpperCase()}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-
-                <View style={styles.productGrid}>
-                    {allProducts.slice(0, 6).map(item => (
-                        <View key={item.id} style={{ width: isMobile ? '50%' : '33.33%' }}>
-                            <ProductCard
-                                item={item}
-                                theme={theme}
-                                isDark={isDark}
-                                onBuy={onBuy}
-                                onProductPress={onProductSelect}
-                                variant="ecommerce"
-                            />
-                        </View>
-                    ))}
-                </View>
-            </View>
-
-            {/* 4. DOWNLOAD APP SECTION (Web Only) */}
-            {Platform.OS === 'web' && (
-                <View style={styles.downloadSection}>
-                    <View style={[styles.downloadContent, { backgroundColor: theme.accent }]}>
-                        <View style={styles.downloadTextContainer}>
-                            <Ionicons name="logo-android" size={40} color="#fff" />
-                            <Text style={styles.downloadTitle}>The KweliStore Experience,{"\n"}Everywhere.</Text>
-                            <Text style={styles.downloadSubtitle}>
-                                Get the official Android app for faster navigation, exclusive mobile offers, and instant order tracking.
-                            </Text>
-                            <TouchableOpacity
-                                style={styles.downloadActionBtn}
-                                onPress={() => Linking.openURL('/KweliStore.apk')}
-                            >
-                                <Text style={[styles.downloadActionText, { color: theme.accent }]}>DOWNLOAD THE APK</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.downloadImageContainer}>
-                            <Ionicons name="phone-portrait-outline" size={200} color="rgba(255,255,255,0.2)" style={styles.phoneIconBg} />
-                        </View>
                     </View>
                 </View>
-            )}
 
-            <View style={{ height: 100 }} />
-        </ScrollView>
+                {/* 6. DOWNLOAD APP (Web Only) */}
+                {Platform.OS === 'web' && (
+                    <View style={styles.downloadSection}>
+                        <View style={[styles.downloadContent, { backgroundColor: theme.primaryGreen }]}>
+                            <View style={styles.downloadTextContainer}>
+                                <Text style={styles.downloadTitle}>Get 10% Discount on App</Text>
+                                <Text style={styles.downloadSubtitle}>Download the KweliStore App for exclusive rewards</Text>
+                                <TouchableOpacity
+                                    style={styles.downloadActionBtn}
+                                    onPress={() => Linking.openURL('/KweliStore.apk')}
+                                >
+                                    <Text style={[styles.downloadActionText, { color: theme.primaryGreen }]}>Download Now</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <Ionicons name="logo-android" size={100} color="rgba(255,255,255,0.1)" style={styles.phoneIconBg} />
+                        </View>
+                    </View>
+                )}
+
+                <View style={{ height: 100 }} />
+            </ScrollView>
+        </View>
     );
 };
 
@@ -171,211 +175,234 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    navBar: {
+    kiliHeader: {
+        paddingTop: Platform.OS === 'ios' ? 50 : 20,
+        paddingBottom: 15,
+        paddingHorizontal: 15,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        zIndex: 100,
+    },
+    headerTop: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 20,
+        alignItems: 'center',
+        marginBottom: 12,
     },
-    navBarRight: {
+    headerTopRight: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    headerActionsWrapper: {
-        marginLeft: 10,
     },
     logo: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '900',
-        letterSpacing: 2,
+        letterSpacing: -0.5,
     },
-    navLinks: {
+    searchRow: {
         flexDirection: 'row',
-        marginRight: 20,
+        alignItems: 'center',
     },
-    navLink: {
-        fontSize: 11,
+    searchBox: {
+        flex: 1,
+        height: 40,
+        backgroundColor: isDark ? '#222' : '#F2F2F2',
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        borderWidth: 1,
+    },
+    searchPlaceholder: {
+        color: '#999',
+        fontSize: 14,
+        marginLeft: 8,
+    },
+    searchBtn: {
+        paddingHorizontal: 15,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopRightRadius: 4,
+        borderBottomRightRadius: 4,
+        marginLeft: -4, // Merge with search box
+    },
+    searchBtnText: {
+        color: '#fff',
         fontWeight: '700',
-        letterSpacing: 1,
-        marginLeft: 20,
+        fontSize: 14,
     },
-    heroBanner: {
-        width: '100%',
-        marginBottom: 30,
+    heroWrapper: {
+        padding: 15,
     },
     heroImg: {
-        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        paddingLeft: 20,
+    },
+    heroOverlay: {
         justifyContent: 'center',
     },
-    heroTextOverlay: {
-        paddingHorizontal: '10%',
-    },
-    heroSubtitle: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '700',
-        marginBottom: 10,
-        textShadowColor: 'rgba(0, 0, 0, 0.75)',
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 10,
-    },
-    heroTitle: {
-        color: '#fff',
-        fontSize: 32,
+    heroBadge: {
+        backgroundColor: '#FFD700',
+        color: '#333',
+        fontSize: 10,
         fontWeight: '900',
-        lineHeight: 40,
-        marginBottom: 20,
-        textShadowColor: 'rgba(0, 0, 0, 0.75)',
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 10,
-    },
-    shopNowBtn: {
-        alignSelf: 'flex-start',
-        paddingHorizontal: 25,
-        paddingVertical: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
         borderRadius: 4,
+        alignSelf: 'flex-start',
+        marginBottom: 8,
     },
-    shopNowText: {
+    heroMainTitle: {
         color: '#fff',
-        fontSize: 13,
-        fontWeight: '700',
+        fontSize: 24,
+        fontWeight: '900',
+        marginBottom: 4,
     },
-    section: {
-        paddingVertical: 30,
+    heroSubTitle: {
+        color: '#eee',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    catSection: {
+        paddingVertical: 15,
+        marginBottom: 10,
+    },
+    catScroll: {
+        paddingHorizontal: 10,
+    },
+    catBubbleItem: {
+        alignItems: 'center',
+        width: 80,
+    },
+    catCircle: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    catBubbleLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    flashSaleSection: {
+        backgroundColor: isDark ? '#1a1a1a' : '#fff',
+        paddingVertical: 15,
+        marginBottom: 10,
     },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        marginBottom: 10,
-    },
-    sectionSubtitle: {
-        fontSize: 13,
-    },
-    sectionTitle: {
-        fontSize: 22,
-        fontWeight: '800',
-        paddingHorizontal: 20,
-        marginBottom: 20,
-    },
-    horizontalScroll: {
-        paddingLeft: 20,
-        paddingRight: 40,
-    },
-    catCardCarousel: {
-        width: 220,
-        marginRight: 20,
         alignItems: 'center',
-        overflow: 'hidden',
+        paddingHorizontal: 15,
+        marginBottom: 12,
     },
-    catImage: {
-        width: '100%',
-        aspectRatio: 1.2,
-        borderRadius: 12,
-        backgroundColor: '#f0f0f0',
-    },
-    catInfo: {
-        marginTop: 10,
+    flashSaleLabelRow: {
+        flexDirection: 'row',
         alignItems: 'center',
     },
-    catTitle: {
-        fontSize: 13,
-        fontWeight: '700',
-        marginBottom: 8,
-        textAlign: 'center',
-    },
-    catBtn: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 4,
-    },
-    catBtnText: {
-        color: '#fff',
-        fontSize: 10,
-        fontWeight: '700',
-    },
-    justForYouTitle: {
-        fontSize: 22,
-        fontWeight: '800',
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    chipScroll: {
-        marginBottom: 20,
-    },
-    chip: {
-        paddingHorizontal: 20,
-        paddingVertical: 8,
-        borderRadius: 4,
-        borderWidth: 1,
+    flashSaleTitle: {
+        fontSize: 16,
+        fontWeight: '900',
+        color: '#E62117', // Flash sale is always red-ish
         marginRight: 10,
     },
-    chipText: {
-        fontSize: 12,
-        fontWeight: '600',
+    timerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    timerBox: {
+        backgroundColor: '#333',
+        color: '#fff',
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        borderRadius: 2,
+        fontSize: 11,
+        fontWeight: '700',
+    },
+    timerSep: {
+        fontWeight: '900',
+        paddingHorizontal: 2,
+    },
+    flashScroll: {
+        paddingHorizontal: 10,
+    },
+    flashCard: {
+        width: 150,
+    },
+    saleBadge: {
+        position: 'absolute',
+        top: 15,
+        right: 15,
+        backgroundColor: '#E62117',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    saleBadgeText: {
+        color: '#fff',
+        fontSize: 9,
+        fontWeight: '900',
+    },
+    mainGridSection: {
+        paddingVertical: 15,
+    },
+    mainGridTitle: {
+        fontSize: 15,
+        fontWeight: '900',
     },
     productGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        paddingHorizontal: 4,
     },
     downloadSection: {
-        paddingHorizontal: 20,
-        paddingVertical: 60,
+        padding: 15,
     },
     downloadContent: {
+        borderRadius: 12,
+        padding: 20,
         flexDirection: 'row',
-        borderRadius: 20,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        position: 'relative',
         overflow: 'hidden',
-        minHeight: 280,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-        elevation: 10,
     },
     downloadTextContainer: {
         flex: 1,
-        padding: 40,
-        justifyContent: 'center',
     },
     downloadTitle: {
         color: '#fff',
-        fontSize: 28,
+        fontSize: 18,
         fontWeight: '900',
-        marginTop: 15,
-        lineHeight: 34,
+        marginBottom: 4,
     },
     downloadSubtitle: {
-        color: 'rgba(255,255,255,0.85)',
-        fontSize: 14,
-        marginTop: 12,
-        marginBottom: 25,
-        lineHeight: 20,
-        maxWidth: 400,
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 12,
+        marginBottom: 15,
     },
     downloadActionBtn: {
         backgroundColor: '#fff',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 20,
         alignSelf: 'flex-start',
-        paddingHorizontal: 25,
-        paddingVertical: 12,
-        borderRadius: 30,
     },
     downloadActionText: {
-        fontWeight: '800',
-        fontSize: 13,
-        letterSpacing: 1,
-    },
-    downloadImageContainer: {
-        width: '30%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.05)',
+        fontWeight: '900',
+        fontSize: 12,
     },
     phoneIconBg: {
         position: 'absolute',
-        right: -40,
-        bottom: -40,
+        right: -20,
+        bottom: -20,
     }
 });
 

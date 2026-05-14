@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const CartPage = ({ cart, onRemove, onClear, onCheckout, theme, onNavigate }) => {
+const CartPage = ({ cart, onRemove, onClear, onCheckout, theme, isDark, onNavigate }) => {
 
     const totalPrice = cart.reduce((sum, item) => {
         const price = parseInt(item.price.replace('KSh ', '').replace(',', ''));
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 10,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f0f0f0',
     },
     itemDetails: {
         flex: 1,

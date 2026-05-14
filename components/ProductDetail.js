@@ -52,15 +52,12 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
     const isDesktop = width >= 768;
     const [selectedVariety, setSelectedVariety] = useState(VARIETIES[0]);
     const [selectedColor, setSelectedColor] = useState(COLORS[0]);
-    // Dynamic image: starts with product image, updates on color/variety change
     const [displayImage, setDisplayImage] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
     if (!product) return null;
 
     const currentImage = displayImage || product.image;
-
-    // Calculate base price (remove 'KSh ' and comma)
     const basePriceNum = parseInt(product.price.replace('KSh ', '').replace(',', ''));
     const currentPrice = `KSh ${(basePriceNum + selectedVariety.priceOffset).toLocaleString()}`;
 
@@ -75,73 +72,72 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
 
-            {/* Header */}
-            <View style={[styles.header, { backgroundColor: theme.background }]}>
+            {/* Premium Kilimall-Style Header */}
+            <View style={[styles.header, { backgroundColor: isDark ? '#1a1a1a' : '#fff', borderBottomColor: theme.border, borderBottomWidth: 0.5 }]}>
                 <TouchableOpacity onPress={() => onNavigate('Shop')} style={styles.headerButton}>
-                    <Ionicons name="arrow-back" size={24} color={theme.accent} />
+                    <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: theme.text }]}>PRODUCT DETAILS</Text>
+                <View style={styles.headerTitleContainer}>
+                    <Text style={[styles.headerTitle, { color: theme.text }]}>PRODUCT DETAILS</Text>
+                </View>
                 <View style={{ flexDirection: 'row' }}>
                     <TouchableOpacity style={styles.headerButton} onPress={() => toggleWishlist(product)}>
                         <Ionicons
                             name={wishlist?.find(i => i.id === product.id) ? "heart" : "heart-outline"}
-                            size={24}
-                            color={wishlist?.find(i => i.id === product.id) ? "#ff4757" : theme.accent}
+                            size={22}
+                            color={wishlist?.find(i => i.id === product.id) ? "#F15A24" : theme.text}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.headerButton}>
-                        <Ionicons name="share-outline" size={24} color={theme.accent} />
+                        <Ionicons name="share-social-outline" size={22} color={theme.text} />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} onScroll={onScroll} scrollEventThrottle={16}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                contentContainerStyle={{ backgroundColor: theme.background }}
+            >
                 <View style={[styles.mainLayout, isDesktop && styles.desktopLayout]}>
                     {/* Image Section */}
                     <View style={[styles.imageContainer, isDesktop && styles.imageContainerDesktop]}>
                         <Image source={currentImage} style={styles.mainImage} resizeMode="cover" />
-                        {!isDesktop && (
-                            <View style={[styles.priceTag, { backgroundColor: theme.accent }]}>
-                                <Text style={styles.priceTagText}>{currentPrice}</Text>
-                            </View>
-                        )}
                     </View>
 
-                    {/* Content */}
-                    <View style={[styles.content, isDesktop && styles.contentDesktop]}>
+                    {/* Content Section */}
+                    <View style={[styles.content, isDesktop && styles.contentDesktop, { backgroundColor: theme.background }]}>
+                        <View style={styles.priceRow}>
+                            <Text style={[styles.priceText, { color: '#F15A24' }]}>{currentPrice}</Text>
+                            <View style={[styles.badge, { backgroundColor: 'rgba(46, 125, 50, 0.1)' }]}>
+                                <Text style={[styles.badgeText, { color: '#2E7D32' }]}>TOP CHOICE</Text>
+                            </View>
+                        </View>
+
                         <Text style={[styles.title, { color: theme.text }]}>{product.title}</Text>
-                        <Text style={[styles.category, { color: theme.accent }]}>Premium Souvenir Collection</Text>
 
-                        {product.uploader_name ? (
-                            <View style={styles.providerBadge}>
-                                <Ionicons name="shield-checkmark-outline" size={16} color={theme.accent} />
-                                <Text style={[styles.providerText, { color: theme.accent, fontWeight: '700' }]}>Service by: {product.uploader_name}</Text>
+                        <View style={styles.ratingRow}>
+                            <View style={styles.stars}>
+                                {[1, 2, 3, 4, 5].map(s => (
+                                    <Ionicons key={s} name="star" size={14} color="#FFB800" />
+                                ))}
                             </View>
-                        ) : null}
+                            <Text style={[styles.ratingCount, { color: theme.secondaryText }]}>4.9 (48 Reviews)</Text>
+                        </View>
 
-                        {product.provider_contact ? (
-                            <View style={styles.providerBadge}>
-                                <Ionicons name="call-outline" size={16} color={theme.secondaryText} />
-                                <Text style={[styles.providerText, { color: theme.secondaryText }]}>Contact: {product.provider_contact}</Text>
-                            </View>
-                        ) : null}
-
-                        {isDesktop && (
-                            <Text style={[styles.desktopPrice, { color: theme.text }]}>{currentPrice}</Text>
-                        )}
+                        <View style={[styles.deliveryInfo, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F9F9F9' }]}>
+                            <Ionicons name="airplane-outline" size={18} color="#2E7D32" />
+                            <Text style={[styles.deliveryText, { color: theme.text }]}>Free Delivery on orders above KSh 5,000</Text>
+                        </View>
 
                         <View style={styles.divider} />
 
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Description</Text>
-                        <Text style={[styles.description, { color: theme.secondaryText }]}>
-                            This handcrafted piece is a testament to authentic craftsmanship. Made with premium materials sourced locally, it embodies the rich cultural heritage of Kenya. Perfect as a gift or a timeless addition to your personal collection.
-                        </Text>
-
                         {/* Variety Selection */}
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Select Variety (Shape)</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>VARIETY: {selectedVariety.label}</Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectorScroll}>
                             {VARIETIES.map((v) => (
                                 <TouchableOpacity
@@ -150,7 +146,7 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                                     style={[
                                         styles.varietyChip,
                                         { borderColor: theme.border },
-                                        selectedVariety.id === v.id && { backgroundColor: theme.accent, borderColor: theme.accent }
+                                        selectedVariety.id === v.id && { backgroundColor: '#2E7D32', borderColor: '#2E7D32' }
                                     ]}
                                 >
                                     <Text style={[
@@ -158,14 +154,14 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                                         { color: theme.secondaryText },
                                         selectedVariety.id === v.id && { color: '#fff' }
                                     ]}>
-                                        {v.label} {v.priceOffset > 0 ? `(+${v.priceOffset})` : ''}
+                                        {v.label}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
 
                         {/* Color Selection */}
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Select Color</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.text, marginTop: 15 }]}>COLOR: {selectedColor.name}</Text>
                         <View style={styles.colorContainer}>
                             {COLORS.map((c) => (
                                 <TouchableOpacity
@@ -178,33 +174,43 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                                     ]}
                                 />
                             ))}
-                            <Text style={[styles.colorName, { color: theme.secondaryText }]}>{selectedColor.name}</Text>
                         </View>
 
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Quantity</Text>
-                        <View style={styles.quantityContainer}>
-                            <TouchableOpacity onPress={() => setQuantity(Math.max(1, quantity - 1))} style={[styles.quantBtn, { borderColor: theme.border }]}>
-                                <Ionicons name="remove" size={20} color={theme.text} />
-                            </TouchableOpacity>
-                            <Text style={[styles.quantText, { color: theme.text }]}>{quantity}</Text>
-                            <TouchableOpacity onPress={() => setQuantity(quantity + 1)} style={[styles.quantBtn, { borderColor: theme.border }]}>
-                                <Ionicons name="add" size={20} color={theme.text} />
-                            </TouchableOpacity>
+                        <View style={styles.divider} />
+
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>DESCRIPTION</Text>
+                        <Text style={[styles.description, { color: theme.secondaryText }]}>
+                            Premium quality handcrafted product from KweliStore. Made with locally sourced materials, ensuring durability and authentic Kenyan aesthetic.
+                        </Text>
+
+                        <View style={styles.divider} />
+
+                        {/* Quantity & Action */}
+                        <View style={styles.quantitySection}>
+                            <Text style={[styles.sectionTitle, { color: theme.text, marginBottom: 0 }]}>QUANTITY</Text>
+                            <View style={styles.quantityContainer}>
+                                <TouchableOpacity onPress={() => setQuantity(Math.max(1, quantity - 1))} style={[styles.quantBtn, { borderColor: theme.border }]}>
+                                    <Ionicons name="remove" size={18} color={theme.text} />
+                                </TouchableOpacity>
+                                <Text style={[styles.quantText, { color: theme.text }]}>{quantity}</Text>
+                                <TouchableOpacity onPress={() => setQuantity(quantity + 1)} style={[styles.quantBtn, { borderColor: theme.border }]}>
+                                    <Ionicons name="add" size={18} color={theme.text} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         <View style={styles.actionRow}>
                             <TouchableOpacity
-                                style={[styles.buyButton, { backgroundColor: theme.accent, flex: 2 }]}
+                                style={[styles.buyButton, { backgroundColor: '#F15A24', flex: 1.5 }]}
                                 onPress={() => {
                                     const contact = product.provider_contact || '254700000000';
                                     const cleanContact = contact.replace(/\D/g, '');
                                     const message = encodeURIComponent(
-                                        `Hi! I'm interested in buying *${product.title}*.\n\n` +
+                                        `Hi! I'm interested in buying *${product.title}* from KweliStore.\n` +
                                         `• Variety: ${selectedVariety.label}\n` +
                                         `• Color: ${selectedColor.name}\n` +
                                         `• Quantity: ${quantity}\n` +
-                                        `• Price: ${currentPrice}\n\n` +
-                                        `Is it available?`
+                                        `• Price: ${currentPrice}`
                                     );
                                     Linking.openURL(`https://wa.me/${cleanContact}?text=${message}`);
                                 }}
@@ -213,21 +219,21 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.cartButton, { borderColor: theme.accent, flex: 1, borderWidth: 2 }]}
+                                style={[styles.cartButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f0f0f0', flex: 1 }]}
                                 onPress={() => onBuy({ ...product, price: currentPrice, variety: selectedVariety.label, color: selectedColor.name, quantity }, false)}
                             >
-                                <Ionicons name="cart-outline" size={24} color={theme.accent} />
+                                <Ionicons name="cart-outline" size={22} color={theme.text} />
+                                <Text style={[styles.cartButtonText, { color: theme.text }]}>ADD TO CART</Text>
                             </TouchableOpacity>
                         </View>
 
-                        <View style={styles.divider} />
+                        <View style={[styles.divider, { marginVertical: 30 }]} />
 
-                        {/* Just For You Section */}
-                        <Text style={[styles.sectionTitle, { color: theme.text, marginBottom: 15 }]}>Just For You</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.text, fontSize: 18, textAlign: 'center' }]}>JUST FOR YOU</Text>
                     </View>
                 </View>
 
-                <View style={styles.relatedContainer}>
+                <View style={[styles.relatedContainer, { backgroundColor: theme.background }]}>
                     <MasonryGrid
                         data={relatedProducts.filter(p => p.id !== product.id)}
                         theme={theme}
@@ -242,22 +248,22 @@ const ProductDetail = ({ product, theme, isDark, onNavigate, onBuy, relatedProdu
                     />
                 </View>
 
-                <View style={{ height: 40 }} />
+                <View style={{ height: 60 }} />
             </ScrollView>
 
             {/* Floating WhatsApp Button */}
             <TouchableOpacity
                 style={styles.whatsappBtn}
                 onPress={() => {
-                    const contact = product.provider_contact || '254700000000'; // Fallback
-                    const cleanContact = contact.replace(/\D/g, ''); // Remove non-numeric
+                    const contact = product.provider_contact || '254700000000';
+                    const cleanContact = contact.replace(/\D/g, '');
                     const message = encodeURIComponent(`Hi! I'm interested in purchasing the "${product.title}". Is it available?`);
                     Linking.openURL(`https://wa.me/${cleanContact}?text=${message}`);
                 }}
             >
                 <Ionicons name="logo-whatsapp" size={28} color="#fff" />
             </TouchableOpacity>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -270,12 +276,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 15,
-        paddingVertical: 10,
-        marginTop: Platform.OS === 'android' ? 30 : 0,
+        paddingVertical: 12,
+        zIndex: 10,
+    },
+    headerTitleContainer: {
+        flex: 1,
+        alignItems: 'center',
     },
     headerTitle: {
-        fontSize: 14,
-        fontWeight: '800',
+        fontSize: 13,
+        fontWeight: '900',
         letterSpacing: 2,
     },
     headerButton: {
@@ -284,7 +294,7 @@ const styles = StyleSheet.create({
     imageContainer: {
         width: '100%',
         aspectRatio: 1,
-        position: 'relative',
+        backgroundColor: '#f5f5f5',
     },
     imageContainerDesktop: {
         width: '45%',
@@ -312,180 +322,175 @@ const styles = StyleSheet.create({
         paddingLeft: 50,
         paddingTop: 0,
     },
-    desktopPrice: {
-        fontSize: 32,
-        fontWeight: '900',
-        marginTop: 10,
-    },
-    priceTag: {
-        position: 'absolute',
-        bottom: 20,
-        right: 0,
-        paddingHorizontal: 25,
-        paddingVertical: 12,
-        borderTopLeftRadius: 30,
-        borderBottomLeftRadius: 30,
-        elevation: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: -2, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-    },
-    priceTagText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: '900',
-    },
     content: {
-        padding: 20,
+        padding: 16,
+    },
+    priceRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    priceText: {
+        fontSize: 24,
+        fontWeight: '900',
+    },
+    badge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+    },
+    badgeText: {
+        fontSize: 10,
+        fontWeight: '900',
     },
     title: {
-        fontSize: 24,
-        fontWeight: '800',
-        marginBottom: 5,
+        fontSize: 18,
+        fontWeight: '700',
+        lineHeight: 24,
+        marginBottom: 10,
     },
-    category: {
-        fontSize: 14,
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        letterSpacing: 1,
+    ratingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 15,
+    },
+    stars: {
+        flexDirection: 'row',
+        marginRight: 8,
+    },
+    ratingCount: {
+        fontSize: 12,
+    },
+    deliveryInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    deliveryText: {
+        fontSize: 12,
+        fontWeight: '600',
+        marginLeft: 8,
     },
     divider: {
         height: 1,
         backgroundColor: 'rgba(128,128,128,0.1)',
-        marginVertical: 20,
+        marginVertical: 15,
     },
     sectionTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        marginBottom: 12,
+        fontSize: 13,
+        fontWeight: '900',
+        marginBottom: 10,
+        letterSpacing: 1,
     },
     description: {
-        fontSize: 15,
-        lineHeight: 24,
-        marginBottom: 10,
+        fontSize: 14,
+        lineHeight: 22,
     },
     selectorScroll: {
-        marginBottom: 10,
+        marginBottom: 5,
     },
     varietyChip: {
-        paddingHorizontal: 18,
-        paddingVertical: 10,
-        borderRadius: 25,
-        borderWidth: 1.5,
-        marginRight: 10,
-        marginBottom: 10,
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+        marginRight: 8,
+        marginBottom: 5,
     },
     varietyText: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '700',
     },
     colorContainer: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
-        marginBottom: 25,
     },
     colorCircle: {
-        width: 34,
-        height: 34,
-        borderRadius: 17,
-        marginRight: 12,
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        marginRight: 10,
         borderWidth: 2,
-        borderColor: 'transparent',
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     selectedColorCircle: {
-        borderColor: '#fff',
-        transform: [{ scale: 1.1 }],
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        borderColor: '#F15A24',
+        transform: [{ scale: 1.15 }],
     },
-    colorName: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginLeft: 5,
-    },
-    buyButton: {
-        width: '100%',
-        paddingVertical: 18,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        marginTop: 10,
-    },
-    buyButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '900',
-        letterSpacing: 1,
-    },
-    actionRow: {
+    quantitySection: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 10,
-    },
-    cartButton: {
-        height: 58,
-        borderRadius: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 15,
+        justifyContent: 'space-between',
+        marginBottom: 20,
     },
     quantityContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
     },
     quantBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         borderWidth: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
     quantText: {
-        fontSize: 16,
-        fontWeight: '700',
-        marginHorizontal: 15,
+        fontSize: 14,
+        fontWeight: '900',
+        marginHorizontal: 12,
+    },
+    actionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    buyButton: {
+        height: 50,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buyButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '900',
+    },
+    cartButton: {
+        height: 50,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 5,
+    },
+    cartButtonText: {
+        fontSize: 12,
+        fontWeight: '900',
     },
     relatedContainer: {
         paddingHorizontal: 5,
     },
     whatsappBtn: {
         position: 'absolute',
-        bottom: Platform.OS === 'android' ? 25 : 35,
+        bottom: 30,
         right: 20,
         backgroundColor: '#25D366',
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 54,
+        height: 54,
+        borderRadius: 27,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 10,
+        elevation: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 5,
         zIndex: 999,
-    },
-    providerBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    providerText: {
-        fontSize: 12,
-        fontWeight: '600',
-        marginLeft: 5,
     }
 });
 

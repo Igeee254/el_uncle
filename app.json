@@ -13,7 +13,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +24,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.mutethia.KweliStoreKenya"
+      "package": "com.mutethia.KweliStoreKenya",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +34,9 @@
       "eas": {
         "projectId": "cbe1b8f6-3c03-46a6-9e4a-43307d25b280"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/cbe1b8f6-3c03-46a6-9e4a-43307d25b280"
     }
   }
 }

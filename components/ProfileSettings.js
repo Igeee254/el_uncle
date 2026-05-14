@@ -96,7 +96,7 @@ const ProfileSettings = ({ onNavigate, onLogout, theme, isDark, userProfile, set
                 {/* 1. Profile Pic Section */}
                 <View style={styles.picSection}>
                     <Image source={{ uri: `https://i.pravatar.cc/150?u=${userProfile.email}` }} style={styles.profileImage} />
-                    <TouchableOpacity style={styles.editPicButton}>
+                    <TouchableOpacity style={[styles.editPicButton, { borderColor: theme.background }]}>
                         <Ionicons name="camera" size={20} color="#fff" />
                     </TouchableOpacity>
                     <Text style={[styles.userName, { color: theme.text }]}>{fullName || nickname}</Text>
@@ -232,7 +232,7 @@ const ProfileSettings = ({ onNavigate, onLogout, theme, isDark, userProfile, set
                                     style={styles.historyItem}
                                     onPress={() => onProductSelect({ id: item.productId, title: item.productName, category: item.category, image_uri: item.image_uri })}
                                 >
-                                    <View style={[styles.historyIcon, { backgroundColor: item.type === 'like' ? '#fff0f3' : '#e8f5e9' }]}>
+                                    <View style={[styles.historyIcon, { backgroundColor: item.type === 'like' ? (isDark ? 'rgba(255, 64, 129, 0.15)' : '#fff0f3') : (isDark ? 'rgba(76, 175, 80, 0.15)' : '#e8f5e9') }]}>
                                         <Ionicons name={item.type === 'like' ? "heart" : "cart"} size={18} color={item.type === 'like' ? "#ff4081" : "#4caf50"} />
                                     </View>
                                     <View style={{ flex: 1, marginLeft: 15 }}>
@@ -301,7 +301,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#fff',
     },
     userName: {
         fontSize: 22,

@@ -34,3 +34,5 @@ test_email.py
 # MacOS
 .DS_Store
 portfolio_recovery/  
+.vercel
+.env*.local
