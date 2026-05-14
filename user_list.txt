@@ -1,0 +1,10 @@
+Total Users: 8
+
+ID: 1 | Name: mimi | Email: amstrongmutethia@gmail.com | Admin: True
+ID: 2 | Name: Mutethia  | Email: mutethiaamstrong@gmail.com | Admin: True
+ID: 3 | Name: Mutethia  | Email: alphawol477@gmail.com | Admin: True
+ID: 4 | Name: S p | Email: sigapro@proton.me | Admin: True
+ID: 6 | Name: Glory kawira | Email: gkawira880@gmail.com | Admin: False
+ID: 7 | Name: Dennis  | Email: mutwiridennis883@gmail.com | Admin: True
+ID: 8 | Name: Kiiru joyce | Email: kiirujoyce7@gmail.com | Admin: False
+ID: 9 | Name: collins mwenda  | Email: collinsmwendamagorwe@gmail.com | Admin: False

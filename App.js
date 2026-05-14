@@ -4,7 +4,6 @@ import { StyleSheet, Text, View, Platform, TouchableOpacity, TextInput, useColor
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MasonryGrid from './components/MasonryGrid';
-import LandingPage from './components/LandingPage';
 import HomePage from './components/HomePage';
 import ProfileSettings from './components/ProfileSettings';
 import AuthPage from './components/AuthPage';
@@ -33,8 +32,8 @@ const HISTORY_KEY = '@activity_history';
 export default function App() {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeMode] = useState('system');
-  const [currentRoute, setCurrentRoute] = useState('Landing');
-  const [navigationStack, setNavigationStack] = useState(['Landing']);
+  const [currentRoute, setCurrentRoute] = useState('Home');
+  const [navigationStack, setNavigationStack] = useState(['Home']);
   const [isNavigating, setIsNavigating] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -258,7 +257,7 @@ export default function App() {
       setCurrentRoute(previousRoute);
       return true; // Prevent default behavior (exiting app)
     }
-    return false; // Allow default behavior (exit if on Landing)
+    return false; // Allow default behavior (exit if on root)
   }, [navigationStack]);
 
   useEffect(() => {
@@ -295,7 +294,7 @@ export default function App() {
       email_notifications: true
     });
     await AsyncStorage.removeItem(STORAGE_KEY);
-    navigateTo('Landing');
+    navigateTo('Home');
   };
 
   const onBuy = (item, isDirect = false) => {
@@ -435,7 +434,6 @@ export default function App() {
       { name: 'Auth', icon: 'person-outline', activeIcon: 'person' },
     ];
 
-    if (currentRoute === 'Landing') return null;
     // Hide on web — bottom nav is not needed on wider screens
     if (Platform.OS === 'web') return null;
 
@@ -486,8 +484,6 @@ export default function App() {
 
   const renderScreen = () => {
     switch (currentRoute) {
-      case 'Landing':
-        return <LandingPage onNavigate={navigateTo} theme={theme} isDark={isDark} headerActions={<HeaderActions />} />;
       case 'Home':
         return (
           <HomePage
@@ -524,6 +520,7 @@ export default function App() {
             theme={theme}
             onNavigate={navigateTo}
             onClear={clearCart}
+            userProfile={userProfile}
           />
         );
       case 'About':
@@ -653,7 +650,23 @@ export default function App() {
           />
         );
       default:
-        return <LandingPage onNavigate={navigateTo} theme={theme} isDark={isDark} headerActions={<HeaderActions />} />;
+        return (
+          <HomePage
+            onNavigate={navigateTo}
+            theme={theme}
+            isDark={isDark}
+            headerActions={<HeaderActions />}
+            onCategorySelect={handleCategorySelect}
+            onBuy={onBuy}
+            onProductSelect={handleProductSelect}
+            allProducts={allProducts}
+            categories={categories}
+            onScroll={handleScroll}
+            wishlist={wishlist}
+            preferredCategories={preferredCategories}
+            toggleWishlist={toggleWishlist}
+          />
+        );
     }
   };
 

@@ -1,6 +1,11 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from extensions import db
@@ -770,6 +775,44 @@ def mpesa_callback():
     callback_data = request.json
     print("M-PESA CALLBACK RECEIVED:", callback_data)
     return jsonify({"ResultCode": 0, "ResultDesc": "Success"})
+
+# ==========================================
+# PAYSTACK DARAJA API ENDPOINTS
+# ==========================================
+PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY', 'sk_test_mock_paystack_key_here')
+
+@app.route('/api/paystack/initialize', methods=['POST'])
+def paystack_initialize():
+    data = request.json
+    email = data.get('email')
+    amount = data.get('amount')
+    
+    if not email or not amount:
+        return jsonify({"error": "Email and amount are required"}), 400
+        
+    try:
+        url = "https://api.paystack.co/transaction/initialize"
+        headers = {
+            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+            "Content-Type": "application/json"
+        }
+        # Paystack expects amount in smallest currency unit (e.g. kobo/cents). For KES it is usually not decimalised like NGN, but Paystack documentation states KES amount should be multiplied by 100
+        payload = {
+            "email": email,
+            "amount": int(float(amount) * 100),
+            "currency": "KES",
+            "callback_url": "https://kwelistorekenya.vercel.app/checkout/success" # Adjust if necessary
+        }
+        response = requests.post(url, json=payload, headers=headers)
+        return jsonify(response.json()), response.status_code
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/paystack/webhook', methods=['POST'])
+def paystack_webhook():
+    callback_data = request.json
+    print("PAYSTACK WEBHOOK RECEIVED:", callback_data)
+    return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     with app.app_context():
