@@ -41,7 +41,7 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
                     </View>
                 </View>
                 <View style={styles.searchRow}>
-                    <View style={[styles.searchBox, { borderColor: theme.border }]}>
+                    <View style={[styles.searchBox, { borderColor: theme.border, backgroundColor: isDark ? '#222' : '#F2F2F2' }]}>
                         <Ionicons name="search" size={20} color="#999" />
                         <Text style={styles.searchPlaceholder}>Search for products...</Text>
                     </View>
@@ -90,7 +90,7 @@ const HomePage = ({ onNavigate, theme, isDark, headerActions, onCategorySelect, 
                 </View>
 
                 {/* 4. FLASH SALE */}
-                <View style={styles.flashSaleSection}>
+                <View style={[styles.flashSaleSection, { backgroundColor: isDark ? '#1a1a1a' : '#fff' }]}>
                     <View style={styles.sectionHeader}>
                         <View style={styles.flashSaleLabelRow}>
                             <Text style={styles.flashSaleTitle}>FLASH SALE</Text>
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     searchBox: {
         flex: 1,
         height: 40,
-        backgroundColor: isDark ? '#222' : '#F2F2F2',
+        backgroundColor: '#F2F2F2', // Default light, will be overridden in render
         borderRadius: 4,
         flexDirection: 'row',
         alignItems: 'center',
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     flashSaleSection: {
-        backgroundColor: isDark ? '#1a1a1a' : '#fff',
+        backgroundColor: '#fff', // Default light, will be overridden in render
         paddingVertical: 15,
         marginBottom: 10,
     },

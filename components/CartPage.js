@@ -11,7 +11,7 @@ const CartPage = ({ cart, onRemove, onClear, onCheckout, theme, isDark, onNaviga
 
     const renderItem = ({ item, index }) => (
         <View style={[styles.cartItem, { borderBottomColor: theme.border }]}>
-            <Image source={item.image} style={styles.itemImage} />
+            <Image source={item.image} style={[styles.itemImage, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f0f0f0' }]} />
             <View style={styles.itemDetails}>
                 <Text style={[styles.itemTitle, { color: theme.text }]}>{item.title}</Text>
                 <Text style={[styles.itemPrice, { color: theme.accent }]}>{item.price}</Text>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         width: 70,
         height: 70,
         borderRadius: 10,
-        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f0f0f0',
+        backgroundColor: '#f0f0f0', // Default light, will be overridden in render
     },
     itemDetails: {
         flex: 1,
